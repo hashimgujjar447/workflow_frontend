@@ -1,26 +1,47 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme{
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+    /* ================= PRIMARY COLORS ================= */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+    --color-primary: #2563EB;
+    --color-primary-hover: #1D4ED8;
+    --color-primary-light: #DBEAFE;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+    /* ================= BACKGROUNDS ================= */
+
+    --color-background: #F8FAFC;      /* main app background */
+    --color-card: #FFFFFF;            /* cards */
+    --color-sidebar: #0F172A;         /* sidebar background */
+
+
+    /* ================= TEXT COLORS ================= */
+
+    --color-text-primary: #0F172A;    /* titles */
+    --color-text-secondary: #475569;  /* descriptions */
+    --color-text-muted: #94A3B8;      /* small labels */
+
+    --color-sidebar-text: #CBD5F5;
+    --color-sidebar-text-hover: #FFFFFF;
+
+
+    /* ================= BORDER ================= */
+
+    --color-border: #E2E8F0;
+
+
+    /* ================= STATUS COLORS ================= */
+
+    --color-success: #10B981;     /* completed */
+    --color-warning: #F59E0B;     /* review */
+    --color-danger: #EF4444;      /* failed */
+    --color-info: #2563EB;        /* in progress */
+    --color-todo: #64748B;        /* todo */
+
+
+    /* ================= HOVER BACKGROUNDS ================= */
+
+    --color-hover-light: #F1F5F9;
+
 }
