@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
    <html lang="en" className={cn("font-sans", inter.variable)}>
-      <body className="bg-background">
+      <body className="bg-backgrounds ">
 
 <Layout>
   {children}

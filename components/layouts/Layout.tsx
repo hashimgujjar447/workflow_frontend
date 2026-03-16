@@ -11,7 +11,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex">
+    <div className="flex h-screen">
 
       {/* Desktop Sidebar */}
       <div className="hidden md:block">
@@ -35,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Page Content */}
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto  ">
         {/* Mobile Topbar */}
         <div className="md:hidden p-4 flex items-center justify-between border-b">
           <button onClick={() => setOpen(true)}>

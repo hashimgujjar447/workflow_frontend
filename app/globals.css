@@ -14,8 +14,8 @@
 
     /* ================= BACKGROUNDS ================= */
 
-    --color-background: #F8FAFC;      /* main app background */
-    --color-card: #FFFFFF;            /* cards */
+    --color-backgrounds: #F8FAFC;      /* main app background */
+    --color-cards: #FFFFFF;            /* cards */
     --color-sidebar: #0F172A;         /* sidebar background */
 
     /* ================= TEXT COLORS ================= */
@@ -29,7 +29,7 @@
 
     /* ================= BORDER ================= */
 
-    --color-border: #E2E8F0;
+    --color-custom_border: #E2E8F0;
 
     /* ================= STATUS COLORS ================= */
 
