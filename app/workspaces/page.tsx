@@ -13,11 +13,11 @@ const page = () => {
       description:"This is the first workspace"
     },
        {
-      title:"First Workspace",
+      title:"second workspace",
       description:"This is the first workspace"
     },
        {
-      title:"First Workspace",
+      title:"Third Workspace",
       description:"This is the first workspace"
     }
   ]);

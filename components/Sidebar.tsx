@@ -12,7 +12,8 @@ import {
 import Link from "next/link";
 import React from "react";
 import { usePathname } from "next/navigation";
-import Button from "./ui/Button";
+import { Button } from "./ui/Button";
+
 
 interface ISideBar {
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -58,8 +59,8 @@ const Sidebar = ({ setOpen }: ISideBar) => {
     <div className="w-24 p-4 bg-black h-screen flex flex-col justify-between items-center">
       {/* Logo + Nav */}
       <div className="flex flex-col items-center">
-        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md">
-          <span className="text-sidebar-text font-bold text-lg italic">W</span>
+        <div className="w-10 h-10 bg-primary_blue rounded-xl flex items-center justify-center shadow-md">
+          <span className="text-sidebar-text font-bold text-lg ">W</span>
         </div>
 
         <ul className="text-sidebar-text text-xs flex flex-col gap-y-5 mt-10">
@@ -85,7 +86,7 @@ const Sidebar = ({ setOpen }: ISideBar) => {
                   >
                     <div
                       className={`${
-                        isActive ? "bg-primary p-1 rounded" : "p-1"
+                        isActive ? "bg-primary_blue p-1 rounded" : "p-1"
                       } transition-colors`}
                     >
                       {item.logo}
