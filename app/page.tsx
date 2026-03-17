@@ -7,28 +7,26 @@ import React, { useState } from "react";
 import DashboardAllTasks from "@/components/features/dashboard/DashboardAllTask";
 import DashboardYourAssign from "@/components/features/dashboard/DashboardYourAssign";
 
-export interface IWorkspace {
-  title: string;
-  description: string;
-  created_by: string;
-  life: number;
-}
+import { IWorkspace } from "@/lib/types";
 
 const Home = () => {
   const [workspaces, setWorkspaces] = useState<IWorkspace[]>([
     {
+      id: 1,
       title: "First Workspace",
       description: "This is the first workspace",
       created_by: "hashim",
       life: 2,
     },
     {
+      id: 2,
       title: "second workspace",
       description: "This is the first workspace",
       created_by: "hashim",
       life: 2,
     },
     {
+      id: 3,
       title: "Third Workspace",
       description: "This is the first workspace",
       created_by: "qasim",

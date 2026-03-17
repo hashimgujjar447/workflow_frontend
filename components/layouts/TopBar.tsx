@@ -1,6 +1,6 @@
 import { BellRing } from 'lucide-react'
 import React from 'react'
-import { IWorkspace } from '@/app/page'
+import { IWorkspace } from '@/lib/types'
 interface ITopbar{
     workspaces?:IWorkspace[]
     setSelectedWorkspace?:React.Dispatch<React.SetStateAction<IWorkspace | null>>
