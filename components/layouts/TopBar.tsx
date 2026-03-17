@@ -1,16 +1,22 @@
 import { BellRing } from 'lucide-react'
 import React from 'react'
-import { IWorkspace } from '@/app/workspaces/page'
+import { IWorkspace } from '@/app/page'
 interface ITopbar{
     workspaces?:IWorkspace[]
+    setSelectedWorkspace?:React.Dispatch<React.SetStateAction<IWorkspace | null>>
 }
 import { Select,SelectContent,SelectItem,SelectTrigger,SelectValue } from "../ui/select";
 
-const TopBar = ({workspaces}:ITopbar) => {
+const TopBar = ({workspaces,setSelectedWorkspace}:ITopbar) => {
   return (
     <div className='flex items-center justify-between'>
         <div>
-           {workspaces ?<Select>
+           {workspaces ?<Select  onValueChange={(value) => {
+    const selected = workspaces?.find(
+      (ws) => ws.title === value
+    );
+    setSelectedWorkspace?.(selected || null);
+  }}>
   <SelectTrigger className="w-[200px]">
     <SelectValue placeholder="Select Workspace" />
   </SelectTrigger>

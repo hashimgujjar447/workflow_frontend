@@ -1,31 +1,18 @@
 'use client'
-import TopBar from '@/components/layouts/TopBar'
+
+import WorkspaceInfo from '@/components/features/workspace/WorkspaceInfo'
+import WorkspaceTopbar from '@/components/features/workspace/WorkspaceTopbar'
+
 import React, { useState } from 'react'
 
-export interface IWorkspace {
-  title: string
-  description: string
-}
-const page = () => {
-  const [workspaces,setWorkspaces]=useState<IWorkspace[]>([
-    {
-      title:"First Workspace",
-      description:"This is the first workspace"
-    },
-       {
-      title:"second workspace",
-      description:"This is the first workspace"
-    },
-       {
-      title:"Third Workspace",
-      description:"This is the first workspace"
-    }
-  ]);
-  return (
-    <div className='p-4'>
-      <TopBar workspaces={workspaces}   />
-    </div>
+const WorkspacePage = () => {
+ 
+  return(
+    <>
+     <WorkspaceTopbar type='workspace'  /> 
+  <WorkspaceInfo  /></>
   )
+  
 }
 
-export default page
+export default WorkspacePage
