@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setCredentials } from "@/store/slices/authSlice/authSlice";
+import { setCredentials, logout } from "@/store/slices/authSlice/authSlice";
 import { useLazyGetProfileQuery } from "@/store/services/authApi";
 
 export default function AuthInitializer() {
@@ -25,9 +25,16 @@ export default function AuthInitializer() {
         const data = await refreshRes.json();
         const access = data.access;
 
-        localStorage.setItem("access", access);
+        // ❌ REMOVE THIS
+        // localStorage.setItem("access", access);
 
-        // 🔥 correct RTK call
+         dispatch(
+          setCredentials({
+            user:null,
+            token: access,
+          })
+        );
+
         const user = await getProfile(undefined).unwrap();
 
         dispatch(
@@ -37,12 +44,7 @@ export default function AuthInitializer() {
           })
         );
       } catch (err) {
-        dispatch(
-          setCredentials({
-            user: null,
-            token: "",
-          })
-        );
+        dispatch(logout());
       }
     };
 

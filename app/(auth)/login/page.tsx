@@ -22,10 +22,7 @@ export default function LoginPage() {
 
       console.log(res)
 
-      // ✅ 1. token save
-      localStorage.setItem("token", res.access);
-
-      // ✅ 2. Redux me save
+    
       dispatch(
         setCredentials({
           user: { email },
