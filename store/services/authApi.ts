@@ -1,3 +1,4 @@
+import { url } from "inspector";
 import { api } from "../api";
 
 export const authApi = api.injectEndpoints({
@@ -9,7 +10,13 @@ export const authApi = api.injectEndpoints({
         body: credentials,
       }),
     }),
+   getProfile: builder.query({
+  query: () => ({
+    url: "profile/",
+    method: "GET",
+  }),
+}),
   }),
 });
 
-export const { useLoginMutation } = authApi;
+export const { useLoginMutation,useGetProfileQuery } = authApi;
