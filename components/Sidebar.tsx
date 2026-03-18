@@ -1,19 +1,17 @@
 "use client";
+
 import {
   BriefcaseBusiness,
   ClipboardList,
-  Ellipsis,
   EllipsisIcon,
   House,
   Mail,
   Settings,
-  X
+  X,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/Button";
-
 
 interface ISideBar {
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,7 +25,7 @@ const Sidebar = ({ setOpen }: ISideBar) => {
       id: 1,
       logo: <House className="w-5 h-5" />,
       text: "Dashboard",
-      href: "/",
+      href: "/dashboard",
     },
     {
       id: 2,
@@ -57,18 +55,14 @@ const Sidebar = ({ setOpen }: ISideBar) => {
 
   return (
     <div className="w-24 p-4 bg-black h-screen flex flex-col justify-between items-center">
-      {/* Logo + Nav */}
       <div className="flex flex-col items-center">
         <div className="w-10 h-10 bg-primary_blue rounded-xl flex items-center justify-center shadow-md">
-          <span className="text-sidebar-text font-bold text-lg ">W</span>
+          <span className="text-sidebar-text font-bold text-lg">W</span>
         </div>
 
         <ul className="text-sidebar-text text-xs flex flex-col gap-y-5 mt-10">
           {sideBarItems.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathName === "/"
-                : pathName.startsWith(item.href);
+            const isActive = pathName.startsWith(item.href);
 
             return (
               <li key={item.id}>
@@ -101,20 +95,17 @@ const Sidebar = ({ setOpen }: ISideBar) => {
         </ul>
       </div>
 
-      {/* Bottom Buttons */}
       <div className="flex flex-col items-center gap-4">
         <div className="text-sidebar-text hidden sm:block cursor-pointer hover:text-white transition">
           <EllipsisIcon />
         </div>
 
-        {/* Mobile Close */}
         <Button
-         onClick={(e) => {
-            e.stopPropagation()
-            setOpen?.(false)
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen?.(false);
           }}
           className="text-sidebar-text md:hidden cursor-pointer hover:text-white transition"
-         
         >
           <X />
         </Button>

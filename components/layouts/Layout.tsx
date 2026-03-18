@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import Sidebar from "../Sidebar";
 import { Menu } from "lucide-react";
+import { Provider } from "react-redux";
+import {store} from '@/store/store'
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,7 +13,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex h-screen">
+  <Provider store={store}>
+      <div className="flex h-screen">
 
       {/* Desktop Sidebar */}
       <div className="hidden md:block">
@@ -48,6 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </div>
     </div>
+  </Provider>
   );
 };
 

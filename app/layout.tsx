@@ -4,6 +4,7 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import Layout from "@/components/layouts/Layout";
 import { cn } from "@/lib/utils";
+import AuthInitializer from "@/components/AuthInitializer";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className="bg-backgrounds ">
 
 <Layout>
+  <AuthInitializer/>
   {children}
 </Layout>
        
