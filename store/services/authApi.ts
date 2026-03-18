@@ -19,4 +19,4 @@ export const authApi = api.injectEndpoints({
   }),
 });
 
-export const { useLoginMutation,useGetProfileQuery } = authApi;
+export const { useLoginMutation,useGetProfileQuery,useLazyGetProfileQuery } = authApi;
