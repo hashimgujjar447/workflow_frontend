@@ -17,7 +17,7 @@ interface ITopbar {
   workspaces?: IWorkspace[]
 }
 
-const TopBar = ({ workspaces }: ITopbar) => {
+const TopBar = ({ workspaces }: any) => {
   const router = useRouter()
   const params = useParams()
   const slug = params?.slug as string | undefined
@@ -37,7 +37,7 @@ const TopBar = ({ workspaces }: ITopbar) => {
             </SelectTrigger>
 
             <SelectContent>
-              {workspaces.map((workspace) => (
+              {workspaces.map((workspace:any) => (
                 <SelectItem
                   key={workspace.slug}
                   value={workspace.slug}

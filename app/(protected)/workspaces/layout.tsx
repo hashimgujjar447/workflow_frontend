@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { IWorkspace } from '@/lib/types'
+import { useGetWorkspacesQuery } from '@/store/services/workspaceApi'
 
 const WorkspaceLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const { selectedProject } = useWorkspace()
@@ -14,14 +15,16 @@ const WorkspaceLayoutContent = ({ children }: { children: React.ReactNode }) => 
   const params = useParams()
   const slug = params?.slug as string | undefined
 
-  const [workspaces] = useState<IWorkspace[]>([
-    { name: 'First Workspace', slug: 'first-workspace' },
-    { name: 'Second Workspace', slug: 'second-workspace' },
-  ])
+
+  const {data,isLoading}=useGetWorkspacesQuery(undefined)
+
+  if(isLoading){
+    return <h1>Loading</h1>
+  }
 
   return (
     <div className="p-4">
-      <TopBar workspaces={workspaces} />
+      <TopBar workspaces={data} />
 
       <div className="mt-6">
         <div className='flex items-center justify-between'>
