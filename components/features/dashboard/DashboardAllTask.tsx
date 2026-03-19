@@ -13,7 +13,7 @@ const DashboardAllTasks = ({tasks}:any) => {
            <h1 className="text-lg font-semibold">Recent Tasks</h1>
           {/* LEFT TASK LIST */}
           <div className="border p-4 rounded bg-cards border-custom_border">
-            {tasks.map((task:any, index:any) => (
+            {tasks && tasks.map((task:any, index:any) => (
               <div
                 key={index}
                 className="flex justify-between items-center py-3 border-b border-custom_border last:border-none"
@@ -22,7 +22,7 @@ const DashboardAllTasks = ({tasks}:any) => {
                   <h3 className="text-sm font-semibold mb-1">{task.title}</h3>
 
                   <p className="text-xs text-text-secondary">
-                    {index + 1}: {task.project}
+                    {index + 1}: {task.project_name}
                   </p>
                 </div>
 

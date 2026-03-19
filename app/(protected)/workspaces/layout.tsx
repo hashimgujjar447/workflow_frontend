@@ -1,53 +1,50 @@
 'use client'
 
 import TopBar from '@/components/layouts/TopBar'
-import { useState } from 'react'
 import { WorkspaceProvider, useWorkspace } from '@/context/WorkspaceContext'
 import { Button } from '@/components/ui/Button'
 import { Plus } from 'lucide-react'
-
-import { IWorkspace } from '@/lib/types';
+import { useParams } from 'next/navigation'
+import { useState } from 'react'
+import { IWorkspace } from '@/lib/types'
 
 const WorkspaceLayoutContent = ({ children }: { children: React.ReactNode }) => {
-  const [workspaces, setWorkspaces] = useState<IWorkspace[]>([
-    { id: 1, title: "First Workspace", description: "...", created_by: "user", life: 1 },
-    { id: 2, title: "second workspace", description: "...", created_by: "user", life: 1 },
+  const { selectedProject } = useWorkspace()
+
+  const params = useParams()
+  const slug = params?.slug as string | undefined
+
+  const [workspaces] = useState<IWorkspace[]>([
+    { name: 'First Workspace', slug: 'first-workspace' },
+    { name: 'Second Workspace', slug: 'second-workspace' },
   ])
-
-  const [selectedWorkspace, setSelectedWorkspace] =
-    useState<IWorkspace | null>(null)
-
-  const { selectedProject } = useWorkspace() // ✅ from context
 
   return (
     <div className="p-4">
-      <TopBar
-        workspaces={workspaces}
-        setSelectedWorkspace={setSelectedWorkspace}
-      />
+      <TopBar workspaces={workspaces} />
 
       <div className="mt-6">
         <div className='flex items-center justify-between'>
-
-          {/* 🔥 Breadcrumb */}
           <h1 className="text-lg font-semibold flex items-center gap-2">
-            {selectedWorkspace ? (
+            {slug ? (
               <>
-                <span>{selectedWorkspace.title}</span>
+                <span>{slug}</span>
 
                 {selectedProject && (
                   <>
                     <span className="text-gray-400">{'>'}</span>
-                    <span className="text-primary_blue">{selectedProject}</span>
+                    <span className="text-primary_blue">
+                      {selectedProject}
+                    </span>
                   </>
                 )}
               </>
             ) : (
-              "Select Workspace"
+              "Dashboard"
             )}
           </h1>
 
-          {selectedWorkspace === null && (
+          {!slug && (
             <Button className="bg-cards text-black rounded border-custom_border border hover:text-white">
               <Plus size={16} /> Create Workspace
             </Button>
@@ -55,7 +52,7 @@ const WorkspaceLayoutContent = ({ children }: { children: React.ReactNode }) => 
         </div>
 
         <div className="mt-3">
-          {selectedWorkspace ? children : <p>Select workspace</p>}
+          {children}
         </div>
       </div>
     </div>

@@ -1,37 +1,63 @@
+'use client'
+
 import { BellRing } from 'lucide-react'
 import React from 'react'
 import { IWorkspace } from '@/lib/types'
-interface ITopbar{
-    workspaces?:IWorkspace[]
-    setSelectedWorkspace?:React.Dispatch<React.SetStateAction<IWorkspace | null>>
-}
-import { Select,SelectContent,SelectItem,SelectTrigger,SelectValue } from "../ui/select";
+import { useRouter, useParams } from 'next/navigation'
 
-const TopBar = ({workspaces,setSelectedWorkspace}:ITopbar) => {
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+
+interface ITopbar {
+  workspaces?: IWorkspace[]
+}
+
+const TopBar = ({ workspaces }: ITopbar) => {
+  const router = useRouter()
+  const params = useParams()
+  const slug = params?.slug as string | undefined
+
   return (
     <div className='flex items-center justify-between'>
-        <div>
-           {workspaces ?<Select  onValueChange={(value) => {
-    const selected = workspaces?.find(
-      (ws) => ws.title === value
-    );
-    setSelectedWorkspace?.(selected || null);
-  }}>
-  <SelectTrigger className="w-[200px]">
-    <SelectValue placeholder="Select Workspace" />
-  </SelectTrigger>
+      <div>
+        {workspaces && workspaces.length > 0 ? (
+          <Select
+            value={slug}
+            onValueChange={(value) => {
+              router.push(`/workspaces/${value}`)
+            }}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select Workspace" />
+            </SelectTrigger>
 
-  <SelectContent>
-    {workspaces?.map((workspace) => (
-      <SelectItem key={workspace.title} value={workspace.title}>
-        {workspace.title}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>:<h1 className='font-bold text-lg'>DashBoard</h1>}
-        </div>
-         <div className='flex items-center gap-x-4'>
-        <input type="text" className='outline-none border border-border p-1 rounded' placeholder='Search' />
+            <SelectContent>
+              {workspaces.map((workspace) => (
+                <SelectItem
+                  key={workspace.slug}
+                  value={workspace.slug}
+                >
+                  {workspace.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <h1 className='font-bold text-lg'>DashBoard</h1>
+        )}
+      </div>
+
+      <div className='flex items-center gap-x-4'>
+        <input
+          type="text"
+          className='outline-none border border-border p-1 rounded'
+          placeholder='Search'
+        />
         <BellRing />
         <div className='bg-black rounded-full text-sidebar-text h-8 flex items-center justify-center w-8'>
           M

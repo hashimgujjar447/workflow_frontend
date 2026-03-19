@@ -1,18 +1,7 @@
 'use client'
 
-import WorkspaceInfo from '@/components/features/workspace/WorkspaceInfo'
-import WorkspaceTopbar from '@/components/features/workspace/WorkspaceTopbar'
-
-import React, { useState } from 'react'
-
-const WorkspacePage = () => {
- 
-  return(
-    <>
-     <WorkspaceTopbar type='workspace'  /> 
-  <WorkspaceInfo  /></>
-  )
-  
+const WorkspaceHome = () => {
+  return <div>Select a workspace</div>
 }
 
-export default WorkspacePage
+export default WorkspaceHome

@@ -1,7 +1,10 @@
 export interface IWorkspace {
-  id: number;
-  title: string;
-  description: string;
-  created_by: string;
-  life: number;
+  name: string;
+  slug: string;
+  creator: string;
+  is_active: boolean;
+  total_members: number;
+  total_projects: number;
+  created_at: string;
+  updated_at: string;
 }

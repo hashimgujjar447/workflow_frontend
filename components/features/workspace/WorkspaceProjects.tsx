@@ -3,11 +3,13 @@
 import { Button } from '@/components/ui/Button'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { Plus } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 const WorkspaceProjects = () => {
   const router = useRouter()
   const{setSelectedProject}=useWorkspace()
+  const params = useParams()
+    const slug = params.slug
 
   return (
     <div className="mt-7">
@@ -48,7 +50,7 @@ const WorkspaceProjects = () => {
                 className="text-xs bg-primary_blue text-white px-3 py-1"
                 onClick={() => {
                    setSelectedProject('Project Alpha')
-                  router.push(`/workspaces/project/${i}`)
+                  router.push(`/workspaces/${slug}/project/${i}`)
                 }}
               >
                 View Details

@@ -13,7 +13,7 @@ const DashboardYourAssign = ({tasks}:any) => {
  <h1 className="text-lg font-semibold">Your Tasks</h1>
           {/* RIGHT ACTIVITY PANEL */}
           <div className="border p-4 rounded bg-cards border-custom_border">
-            {tasks.map((task:any, index:any) => (
+            {tasks && tasks.map((task:any, index:any) => (
               <div
                 key={index}
                 className="flex justify-between items-center py-3 border-b border-custom_border last:border-none"
