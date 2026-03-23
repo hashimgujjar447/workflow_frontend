@@ -7,7 +7,7 @@ import WorkspaceMembers from './WorkspaceMemebrs'
 import WorkspaceSettings from './WorkspaceSettings'
 
 
-const WorkspaceInfo = () => {
+const WorkspaceInfo = ({data }:any) => {
   const { selectedItem } = useWorkspace()
 
   const renderView = () => {

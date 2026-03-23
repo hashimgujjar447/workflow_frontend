@@ -22,6 +22,8 @@ const TopBar = ({ workspaces }: any) => {
   const params = useParams()
   const slug = params?.slug as string | undefined
 
+  
+
   return (
     <div className='flex items-center justify-between'>
       <div>

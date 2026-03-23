@@ -4,12 +4,19 @@ import { Button } from '@/components/ui/Button'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { Plus } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
+import { useGetWorkspaceProjectsQuery } from '@/store/services/workspaceApi'
 
 const WorkspaceProjects = () => {
   const router = useRouter()
-  const{setSelectedProject}=useWorkspace()
+  const { setSelectedProject } = useWorkspace()
   const params = useParams()
-    const slug = params.slug
+  const slug = params.slug
+
+  const { data, isLoading } = useGetWorkspaceProjectsQuery(slug, {
+    skip: !slug,
+  })
+
+  if (isLoading) return <p>Loading projects...</p>
 
   return (
     <div className="mt-7">
@@ -22,35 +29,26 @@ const WorkspaceProjects = () => {
       </div>
 
       <div className="grid grid-cols-3 mt-3 gap-x-20 gap-y-10">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="bg-white border rounded-xl p-4 hover:shadow-md transition">
+        {data?.map((project:any) => (
+          <div key={project.slug} className="bg-white border rounded-xl p-4 hover:shadow-md transition">
             
             <div className="flex justify-between items-start">
-              <h3 className="font-semibold text-sm">Project Alpha</h3>
+              <h3 className="font-semibold text-sm">{project.name}</h3>
               <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                Active
+                {project.status}
               </span>
             </div>
 
             <p className="text-xs text-gray-500 mt-1">
-              Website redesign project
+              Created at: {new Date(project.created_at).toLocaleDateString()}
             </p>
 
             <div className="flex justify-between items-center mt-4">
-              <div className="flex -space-x-2">
-                <div className="h-6 w-6 bg-black rounded-full text-white text-xs flex items-center justify-center">
-                  A
-                </div>
-                <div className="h-6 w-6 bg-gray-300 rounded-full text-xs flex items-center justify-center">
-                  B
-                </div>
-              </div>
-
               <Button
                 className="text-xs bg-primary_blue text-white px-3 py-1"
                 onClick={() => {
-                   setSelectedProject('Project Alpha')
-                  router.push(`/workspaces/${slug}/project/${i}`)
+                  setSelectedProject(project)
+                  router.push(`/workspaces/${slug}/projects/${project.slug}`)
                 }}
               >
                 View Details
