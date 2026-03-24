@@ -48,7 +48,7 @@ const WorkspaceProjects = () => {
                 className="text-xs bg-primary_blue text-white px-3 py-1"
                 onClick={() => {
                   setSelectedProject(project)
-                  router.push(`/workspaces/${slug}/projects/${project.slug}`)
+                  router.push(`/workspaces/${slug}/project/${project.slug}`)
                 }}
               >
                 View Details

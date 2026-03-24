@@ -3,46 +3,99 @@
 import React from 'react'
 import { Calendar, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { useGetProjectTasksQuery } from '@/store/services/workspaceApi'
+import { useParams } from 'next/navigation'
 
-const columns = [
-  {
-    id: 'todo',
-    title: 'To Do',
-    color: 'bg-todo',
-    tasks: [
-      { id: 1, title: 'Plan site structure', date: 'June 25' },
-      { id: 2, title: 'Develop style guide', date: 'July 3' },
-       { id: 3, title: 'Develop style guide', date: 'July 3' },
-        { id: 4, title: 'Develop style guide', date: 'July 3' },
-    ],
-  },
-  {
-    id: 'inprogress',
-    title: 'In Progress',
-    color: 'bg-info',
-    tasks: [
-      { id: 3, title: 'Design homepage', date: 'June 27' },
-    ],
-  },
-  {
-    id: 'failed',
-    title: 'Failed',
-    color: 'bg-warning',
-    tasks: [
-      { id: 4, title: 'API Integration', date: 'June 20' },
-    ],
-  },
-  {
-    id: 'completed',
-    title: 'Completed',
-    color: 'bg-success',
-    tasks: [
-      { id: 5, title: 'Setup project repo', date: 'June 10' },
-    ],
-  },
-]
+/* ================= TYPES ================= */
+
+type TaskStatus = 'todo' | 'inprogress' | 'failed' | 'completed'
+
+interface ITask {
+  id: number
+  title: string
+  description?: string
+  status: TaskStatus
+  due_date?: string
+  created_at?: string
+}
+
+interface IGroupedTasks {
+  todo: ITask[]
+  inprogress: ITask[]
+  failed: ITask[]
+  completed: ITask[]
+}
+
+/* ================= COMPONENT ================= */
 
 const ProjectTasks = () => {
+  const params = useParams()
+
+  const workspace_slug = params?.slug as string
+  const project_slug = params?.project_slug as string
+
+  const { data, isLoading, error } = useGetProjectTasksQuery(
+    {
+      workspace_slug,
+      project_slug,
+    },
+    {
+      skip: !workspace_slug || !project_slug,
+    }
+  )
+
+  /* ================= SAFE DATA ================= */
+
+  const tasksData: IGroupedTasks = data ?? {
+    todo: [],
+    inprogress: [],
+    failed: [],
+    completed: [],
+  }
+
+  /* ================= LOADING ================= */
+
+  if (isLoading) {
+    return <div className="mt-5 text-sm">Loading tasks...</div>
+  }
+
+  /* ================= ERROR ================= */
+
+  if (error) {
+    return <div className="mt-5 text-red-500 text-sm">Failed to load tasks</div>
+  }
+
+  /* ================= COLUMNS ================= */
+
+  const columns = [
+    {
+      id: 'todo',
+      title: 'To Do',
+      color: 'bg-todo',
+      tasks: tasksData.todo,
+    },
+    {
+      id: 'inprogress',
+      title: 'In Progress',
+      color: 'bg-info',
+      tasks: tasksData.inprogress,
+    },
+    {
+      id: 'failed',
+      title: 'Failed',
+      color: 'bg-warning',
+      tasks: tasksData.failed,
+    },
+    {
+      id: 'completed',
+      title: 'Completed',
+      color: 'bg-success',
+      tasks: tasksData.completed,
+    },
+  ]
+
+  /* ================= UI ================= */
+
   return (
     <div className="mt-5">
 
@@ -74,7 +127,7 @@ const ProjectTasks = () => {
 
             {/* Tasks */}
             <div className="mt-3 space-y-3 max-h-60 overflow-y-auto pr-1">
-              
+
               {col.tasks.length === 0 && (
                 <p className="text-xs text-gray-400 text-center mt-5">
                   No tasks yet
@@ -90,14 +143,19 @@ const ProjectTasks = () => {
 
                   <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
                     <Calendar size={12} />
-                    <span>{task.date}</span>
+                    <span>
+                      {task.due_date
+                        ? new Date(task.due_date).toLocaleDateString()
+                        : 'No date'}
+                    </span>
                   </div>
                 </div>
               ))}
-            </div>
 
+            </div>
           </div>
         ))}
+
       </div>
     </div>
   )

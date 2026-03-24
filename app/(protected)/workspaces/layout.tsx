@@ -5,15 +5,20 @@ import { WorkspaceProvider, useWorkspace } from '@/context/WorkspaceContext'
 import { Button } from '@/components/ui/Button'
 import { Plus } from 'lucide-react'
 import { useParams } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IWorkspace } from '@/lib/types'
 import { useGetWorkspacesQuery } from '@/store/services/workspaceApi'
 
 const WorkspaceLayoutContent = ({ children }: { children: React.ReactNode }) => {
-  const { selectedProject } = useWorkspace()
+  const { selectedProject,isProjectLoaded } = useWorkspace()
 
   const params = useParams()
   const slug = params?.slug as string | undefined
+
+  useEffect(()=>{
+console.log("selectedProject:", selectedProject)
+console.log("isProjectLoaded:", isProjectLoaded)
+  },[selectedProject,isProjectLoaded])
 
 
   const {data,isLoading}=useGetWorkspacesQuery(undefined)
@@ -33,11 +38,11 @@ const WorkspaceLayoutContent = ({ children }: { children: React.ReactNode }) => 
               <>
                 <span>{slug}</span>
 
-                {selectedProject && (
+                {selectedProject?.name && (
                   <>
                     <span className="text-gray-400">{'>'}</span>
                     <span className="text-primary_blue">
-                      {selectedProject}
+                      {selectedProject?.name}
                     </span>
                   </>
                 )}
