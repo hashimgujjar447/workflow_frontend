@@ -8,6 +8,7 @@ import ProjectSettings from '@/components/features/project/ProjectSettings'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { useEffect } from 'react'
 import { useGetWorkspaceProjectDetailQuery } from '@/store/services/workspaceApi'
+import { IItem } from '@/types/project'
 
 const ProjectDetail = () => {
   const params = useParams()
@@ -35,7 +36,8 @@ const ProjectDetail = () => {
   // ✅ Context update when data arrives
   useEffect(() => {
     if (project) {
-    
+     
+      console.log(project)
       setSelectedProject(project)
     
     }
@@ -47,11 +49,11 @@ const ProjectDetail = () => {
   const renderView = () => {
     switch (selectedItem) {
       case 'project-tasks':
-        return <ProjectTasks project={project} />
+        return <ProjectTasks  />
       case 'project-members':
         return <ProjectMembers project={project} />
       case 'project-settings':
-        return <ProjectSettings project={project} />
+        return <ProjectSettings  />
       default:
         return null
     }

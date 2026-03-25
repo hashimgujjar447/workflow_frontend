@@ -88,7 +88,7 @@ const ProjectSettings = () => {
         <p className="font-medium">{selectedProject.slug}</p>
 
         <p className="text-sm text-gray-500 mt-2">Total Members</p>
-        <p>{selectedProject.total_members}</p>
+        <p>{selectedProject?.total_members}</p>
       </div>
 
       {/* ✏️ Edit Name */}

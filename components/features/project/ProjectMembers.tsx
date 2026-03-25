@@ -2,8 +2,14 @@
 import React from 'react'
 import { useGetProjectMembersQuery } from '@/store/services/workspaceApi'
 import { useParams } from 'next/navigation'
+import { IItem } from '@/types/project'
+import { IProjectMember } from '@/types/project'
 
-const ProjectMembers = ({ project }) => {
+interface ProjectMembersProps {
+  project: IItem
+}
+
+const ProjectMembers = ({ project }:ProjectMembersProps) => {
   const { slug: projectSlug } = project
   const params = useParams()
 
@@ -24,9 +30,11 @@ const ProjectMembers = ({ project }) => {
     }
   )
 
+  console.log(members)
+
   if (isLoading) return <div>Loading members...</div>
 
-  if (isError && error?.status === 403) {
+  if (isError ) {
     return <p>Sorry, you don't have access</p>
   }
 
@@ -40,7 +48,7 @@ const ProjectMembers = ({ project }) => {
 
       {members?.length === 0 && <p>No members found</p>}
 
-      {members?.map((member, index) => {
+      {members?.map((member:IProjectMember, index:number) => {
         const user = member?.member_detail
 
         return (
