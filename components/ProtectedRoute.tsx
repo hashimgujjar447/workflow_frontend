@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -13,27 +13,25 @@ export default function ProtectedRoute({
 }) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const pathname = usePathname(); // ✅ current path
 
   const isInitialized = useSelector(
     (state: RootState) => state.auth.isInitialized
   );
 
-
-   useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated && isInitialized) {
-      router.push("/login");
+      // 🔥 redirect with return path
+      router.push(`/login?redirect=${pathname}`);
     }
-  }, [isAuthenticated, router,isInitialized]);
+  }, [isAuthenticated, isInitialized, router, pathname]);
 
-  // 🔥 wait until auth is ready
   if (!isInitialized) {
     return <p>Checking auth...</p>;
   }
 
- 
-
   if (!isAuthenticated) {
-    return null; // flicker avoid
+    return null;
   }
 
   return <>{children}</>;

@@ -4,11 +4,15 @@ import { useState } from "react";
 import { useLoginMutation } from "@/store/services/authApi";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/store/slices/authSlice/authSlice";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const searchParams=useSearchParams()
+    const redirect = searchParams.get('redirect')
+const redirectParam = redirect ? encodeURIComponent(redirect) : ''
 
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
@@ -20,8 +24,7 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password }).unwrap();
 
-      console.log(res)
-
+    
     
       dispatch(
         setCredentials({
@@ -31,7 +34,7 @@ export default function LoginPage() {
       );
 
       // ✅ 3. redirect
-      router.push("/dashboard");
+      router.push(redirect || "/dashboard");
 
     } catch (err) {
       console.error("Login failed", err);
@@ -65,6 +68,16 @@ export default function LoginPage() {
         <button className="w-full bg-black text-white py-2 rounded">
           {isLoading ? "Logging in..." : "Login"}
         </button>
+         <p className="text-sm mt-3 text-center">
+                   Not have an account?{" "}
+                 <Link
+  href={redirect ? `/register?redirect=${redirectParam}` : '/register'}
+  className="text-blue-500"
+>
+  Register
+</Link>
+                  
+                </p>
       </form>
     </div>
   );

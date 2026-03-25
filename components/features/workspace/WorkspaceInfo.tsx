@@ -3,7 +3,7 @@
 import React from 'react'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import WorkspaceProjects from './WorkspaceProjects'
-import WorkspaceMembers from './WorkspaceMemebrs'
+import WorkspaceMembers from './WorkspaceMembers'
 import WorkspaceSettings from './WorkspaceSettings'
 
 

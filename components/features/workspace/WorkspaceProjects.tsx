@@ -5,6 +5,8 @@ import { useWorkspace } from '@/context/WorkspaceContext'
 import { Plus } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useGetWorkspaceProjectsQuery } from '@/store/services/workspaceApi'
+import { IProject } from '@/types/project'
+
 
 const WorkspaceProjects = () => {
   const router = useRouter()
@@ -29,7 +31,7 @@ const WorkspaceProjects = () => {
       </div>
 
       <div className="grid grid-cols-3 mt-3 gap-x-20 gap-y-10">
-        {data?.map((project:any) => (
+        {data?.map((project:IProject) => (
           <div key={project.slug} className="bg-white border rounded-xl p-4 hover:shadow-md transition">
             
             <div className="flex justify-between items-start">

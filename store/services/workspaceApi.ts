@@ -7,7 +7,16 @@ export const workspaceApi = api.injectEndpoints({
         url: 'workspaces/',
         method: 'GET',
       }),
+       providesTags: ['Workspaces'],
     }),
+    createWorkspace: builder.mutation({
+  query: (body: { name: string }) => ({
+    url: '/workspaces/',
+    method: 'POST',
+    body,
+  }),
+    invalidatesTags: ['Workspaces'],
+}),
 
     getSingleWorkspace: builder.query({
       query: (workspace_slug) => ({
@@ -85,7 +94,28 @@ export const workspaceApi = api.injectEndpoints({
         url: `workspaces/${workspace_slug}/projects/${project_slug}/members/`,
       }),
     }),
+    inviteMember: builder.mutation<
+  { message: string },
+  { slug: string; email: string }
+>({
+  query: ({ slug, email }) => ({
+    url: `workspaces/${slug}/invite/`,
+    method: 'POST',
+    body: { email },
   }),
+}),
+getInvites: builder.query<any[], void>({
+  query: () => 'invites/',
+}),
+handleInvite: builder.mutation({
+  query: ({ token, action }) => ({
+    url: 'invites/action/',
+    method: 'POST',
+    body: { token, action },
+  }),
+})
+  }),
+  
 })
 
 export const {
@@ -101,4 +131,8 @@ export const {
   useGetProjectTasksQuery,
   useUpdateProjectMutation,
   useDeleteProjectMutation,
+  useCreateWorkspaceMutation,
+  useInviteMemberMutation,
+  useGetInvitesQuery,
+  useHandleInviteMutation
 } = workspaceApi

@@ -22,7 +22,7 @@ const Home = () => {
     data: tasksData,
     isLoading: tasksLoading,
   } = useGetAllTasksQuery(undefined);
-  console.log(tasksData)
+ 
 
   // Prevent hydration mismatch
   if (workspacesLoading || tasksLoading) {

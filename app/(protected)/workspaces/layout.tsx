@@ -4,26 +4,45 @@ import TopBar from '@/components/layouts/TopBar'
 import { WorkspaceProvider, useWorkspace } from '@/context/WorkspaceContext'
 import { Button } from '@/components/ui/Button'
 import { Plus } from 'lucide-react'
-import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { IWorkspace } from '@/lib/types'
-import { useGetWorkspacesQuery } from '@/store/services/workspaceApi'
+import { useParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useGetWorkspacesQuery, useCreateWorkspaceMutation } from '@/store/services/workspaceApi'
 
 const WorkspaceLayoutContent = ({ children }: { children: React.ReactNode }) => {
-  const { selectedProject,isProjectLoaded } = useWorkspace()
+  const { selectedProject } = useWorkspace()
+
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [name, setName] = useState<string>('')
 
   const params = useParams()
   const slug = params?.slug as string | undefined
+  const router = useRouter()
 
-  useEffect(()=>{
-console.log("selectedProject:", selectedProject)
-console.log("isProjectLoaded:", isProjectLoaded)
-  },[selectedProject,isProjectLoaded])
+  const { data, isLoading } = useGetWorkspacesQuery(undefined)
+  const [createWorkspace, { isLoading: createWorkspaceLoading }] = useCreateWorkspaceMutation()
+
+  const handleSubmit = async () => {
+    try {
+      if (name.trim() === '') {
+        return alert('Please enter a name for workspace')
+      }
+
+      await createWorkspace({ name }).unwrap() // ✅ FIXED
+
+      setIsOpen(false)
+      setName('')
+
+      router.push('/workspaces') // ✅ redirect after success
+
+    } catch (error: any) {
+      console.error(error)
+
+      alert(error?.data?.name || 'Failed to create workspace please ensure unique workspace name') // ✅ show error
+    }
+  }
 
 
-  const {data,isLoading}=useGetWorkspacesQuery(undefined)
-
-  if(isLoading){
+  if (isLoading) {
     return <h1>Loading</h1>
   }
 
@@ -53,7 +72,10 @@ console.log("isProjectLoaded:", isProjectLoaded)
           </h1>
 
           {!slug && (
-            <Button className="bg-cards text-black rounded border-custom_border border hover:text-white">
+            <Button
+              onClick={() => setIsOpen(true)}
+              className="bg-cards text-black rounded border-custom_border border hover:text-white"
+            >
               <Plus size={16} /> Create Workspace
             </Button>
           )}
@@ -63,6 +85,41 @@ console.log("isProjectLoaded:", isProjectLoaded)
           {children}
         </div>
       </div>
+
+      {/* ✅ Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-xl w-[400px]">
+
+            <h2 className="text-lg font-semibold mb-4">
+              Create Workspace
+            </h2>
+
+            <input
+              type="text"
+              placeholder="Workspace Name"
+              className="border w-full p-2 rounded mb-4"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-2">
+              <Button onClick={() => setIsOpen(false)}>
+                Cancel
+              </Button>
+
+              <Button
+                onClick={handleSubmit}
+                disabled={createWorkspaceLoading}
+                className="bg-blue-600 text-white"
+              >
+                {createWorkspaceLoading ? 'Creating...' : 'Create'}
+              </Button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   )
 }

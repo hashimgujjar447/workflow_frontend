@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation"
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -12,6 +13,10 @@ export default function RegisterPage() {
     password: "",
   });
 
+const searchParams = useSearchParams()
+const router = useRouter()
+
+const redirect = searchParams.get('redirect')
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
@@ -78,9 +83,12 @@ export default function RegisterPage() {
 
         <p className="text-sm mt-3 text-center">
           Already have an account?{" "}
-          <Link href="/login" className="text-blue-500">
-            Login
-          </Link>
+        <Link
+  href={redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'}
+  className="text-blue-500"
+>
+  Login
+</Link>
         </p>
       </form>
     </div>
