@@ -54,12 +54,15 @@ export const workspaceApi = api.injectEndpoints({
       }),
     }),
 
-    getWorkspaceMembers: builder.query({
-      query: (workspace_slug) => ({
-        url: `workspaces/${workspace_slug}/members/`,
-        method: 'GET',
-      }),
-    }),
+  getWorkspaceMembers: builder.query({
+  query: ({ workspace_slug, exclude_project }) => ({
+    url: `workspaces/${workspace_slug}/members/`,
+    method: 'GET',
+    params: exclude_project
+      ? { exclude_project }
+      : undefined,
+  }),
+}),
 
     updateWorkspace: builder.mutation({
       query: ({ slug, ...body }) => ({
