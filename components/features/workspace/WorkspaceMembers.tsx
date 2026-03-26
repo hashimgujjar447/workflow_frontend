@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/Button'
 
 const WorkspaceMembers = () => {
   const params = useParams()
-  const slug = params.slug as string
+  const slug = params?.slug as string
+  console.log(slug)
 
-  const { data, isLoading, error } = useGetWorkspaceMembersQuery(slug, {
+  const { data, isLoading, error } = useGetWorkspaceMembersQuery({workspace_slug:slug}, {
     skip: !slug,
   })
 

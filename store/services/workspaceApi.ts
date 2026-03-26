@@ -89,14 +89,28 @@ export const workspaceApi = api.injectEndpoints({
     getProjectTasks: builder.query({
       query: ({ workspace_slug, project_slug }) => ({
         url: `workspaces/${workspace_slug}/projects/${project_slug}/tasks/`,
+        method:"GET"
       }),
     }),
 
     getProjectMembers: builder.query({
       query: ({ workspace_slug, project_slug }) => ({
         url: `workspaces/${workspace_slug}/projects/${project_slug}/members/`,
+        method:"GET"
       }),
+        providesTags: ['ProjectMembers'],
     }),
+    addProjectMember: builder.mutation({
+  query: ({ workspace_slug, project_slug, member, role }) => ({
+    url: `workspaces/${workspace_slug}/projects/${project_slug}/members/`,
+    method: 'POST',
+    body: {
+      member,
+      role,
+    },
+  }),
+    invalidatesTags: ['ProjectMembers'],
+}),
     inviteMember: builder.mutation<
   { message: string },
   { slug: string; email: string }
@@ -137,5 +151,6 @@ export const {
   useCreateWorkspaceMutation,
   useInviteMemberMutation,
   useGetInvitesQuery,
-  useHandleInviteMutation
+  useHandleInviteMutation,
+  useAddProjectMemberMutation
 } = workspaceApi

@@ -29,7 +29,7 @@ const ProjectDetail = () => {
     }
   )
 
-  console.log(project)
+ 
 
 
 
