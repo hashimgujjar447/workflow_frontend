@@ -4,7 +4,7 @@ import React from 'react'
 import { Calendar, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useGetProjectTasksQuery } from '@/store/services/workspaceApi'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 /* ================= TYPES ================= */
 
@@ -30,6 +30,7 @@ interface IGroupedTasks {
 
 const ProjectTasks = () => {
   const params = useParams()
+  const router = useRouter()
 
   const workspace_slug = params?.slug as string
   const project_slug = params?.project_slug as string
@@ -137,10 +138,17 @@ const ProjectTasks = () => {
               {col.tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="bg-white p-3 rounded-lg border hover:shadow-md transition cursor-pointer"
+                  onClick={() =>
+                    router.push(
+                      `/workspaces/${workspace_slug}/project/${project_slug}/tasks/${task.id}`
+                    )
+                  }
+                  className="bg-white p-3 rounded-lg border hover:shadow-md transition cursor-pointer group"
                 >
+                  {/* Title */}
                   <h3 className="text-sm font-medium">{task.title}</h3>
 
+                  {/* Due Date */}
                   <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
                     <Calendar size={12} />
                     <span>
@@ -149,6 +157,11 @@ const ProjectTasks = () => {
                         : 'No date'}
                     </span>
                   </div>
+
+                  {/* 🔥 Hover CTA */}
+                  <p className="mt-3 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition">
+                    View details →
+                  </p>
                 </div>
               ))}
 

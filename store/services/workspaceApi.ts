@@ -130,8 +130,17 @@ handleInvite: builder.mutation({
     method: 'POST',
     body: { token, action },
   }),
+}),
+getTask: builder.query({
+  query: ({ workspace_slug, project_slug, task_id }) =>
+    `/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/`,
+}),
+getTaskComments: builder.query({
+  query: ({ workspace_slug, project_slug, task_id, page = 1 }) =>
+    `/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/comments/?page=${page}`,
 })
   }),
+  
   
 })
 
@@ -152,5 +161,7 @@ export const {
   useInviteMemberMutation,
   useGetInvitesQuery,
   useHandleInviteMutation,
-  useAddProjectMemberMutation
+  useAddProjectMemberMutation,
+  useGetTaskQuery,
+  useGetTaskCommentsQuery
 } = workspaceApi
