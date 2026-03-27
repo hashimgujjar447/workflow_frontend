@@ -155,11 +155,30 @@ getTask: builder.query({
   query: ({ workspace_slug, project_slug, task_id }) =>
     `/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/`,
 }),
+updateTaskStatus: builder.mutation({
+  query: ({ workspace_slug, project_slug, task_id, status }) => ({
+    url: `/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/`,
+    method: 'PATCH', // ✅ PATCH better hai (partial update)
+    body: { status },
+  }),
+
+  invalidatesTags: ['Tasks'],
+}),
 getTaskComments: builder.query({
   query: ({ workspace_slug, project_slug, task_id, page = 1 }) =>
     `/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/comments/?page=${page}`,
-}),
 
+  providesTags: ['TaskComments'],
+}),
+addComment: builder.mutation({
+  query: ({ workspace_slug, project_slug, task_id, ...body }) => ({
+    url: `/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/comments/`,
+    method: 'POST',
+    body, 
+  }),
+
+  invalidatesTags: ['TaskComments'],
+}),
   }),
   
   
@@ -185,5 +204,7 @@ export const {
   useAddProjectMemberMutation,
   useGetTaskQuery,
   useGetTaskCommentsQuery,
-  useAddNewTaskMutation
+  useAddNewTaskMutation,
+  useAddCommentMutation,
+  useUpdateTaskStatusMutation
 } = workspaceApi

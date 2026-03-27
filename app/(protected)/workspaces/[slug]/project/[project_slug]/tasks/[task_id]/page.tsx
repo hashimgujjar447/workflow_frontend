@@ -1,8 +1,10 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useGetTaskQuery } from '@/store/services/workspaceApi'
+import { useGetTaskQuery, useUpdateTaskStatusMutation } from '@/store/services/workspaceApi'
 import { Calendar } from 'lucide-react'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/store/store'
 
 const statusColors = {
   todo: 'bg-gray-200 text-gray-700',
@@ -14,6 +16,7 @@ const statusColors = {
 const TaskDetailPage = () => {
   const params = useParams()
   const router = useRouter()
+  const{user}=useSelector((state:RootState)=>state.auth)
 
   const { slug, project_slug, task_id } = params as {
     slug: string
@@ -25,8 +28,12 @@ const TaskDetailPage = () => {
     workspace_slug: slug,
     project_slug,
     task_id,
+  }, {
+    refetchOnMountOrArgChange: true,
   })
 
+  const [updateStatus, { isLoading: isUpdating }] =
+  useUpdateTaskStatusMutation()
   if (isLoading) return <div className="p-5 text-sm">Loading...</div>
   if (!task) return <div className="p-5 text-red-500">Task not found</div>
 
@@ -40,10 +47,30 @@ const TaskDetailPage = () => {
 
         {/* 🔥 Status */}
         <div className="mt-2">
-          <span className={`text-xs px-3 py-1 rounded-full ${statusColors[task.status]}`}>
+          {task.assigned_to?.member?.email===user?.email ?  <select
+  value={task.status}
+  onChange={async (e) => {
+    await updateStatus({
+      workspace_slug: slug,
+      project_slug,
+      task_id,
+      status: e.target.value,
+    })
+    alert("task status update")
+  }}
+  className={`text-xs px-3 py-1 rounded-full border ${statusColors[task.status]}`}
+>
+  <option value="todo">Todo</option>
+  <option value="in_progress">In Progress</option>
+  <option value="completed">Completed</option>
+  <option value="failed">Failed</option>
+</select> : <span className={`text-xs px-3 py-1 rounded-full ${statusColors[task.status]}`}>
             {task.status}
-          </span>
+          </span>}
+         
+         
         </div>
+       
 
         {/* 🔥 Description */}
         <div className="mt-6">
@@ -150,7 +177,7 @@ const TaskDetailPage = () => {
           <button
             onClick={() =>
               router.push(
-                `/workspace/${slug}/projects/${project_slug}/tasks/${task_id}?comments=true`
+                `/workspaces/${slug}/project/${project_slug}/tasks/${task_id}/comments`
               )
             }
             className="mt-4 text-xs text-blue-600 hover:underline"

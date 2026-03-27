@@ -9,7 +9,7 @@ import { useParams } from 'next/navigation'
 import { IItem, IProjectMember } from '@/types/project'
 import { Button } from '@/components/ui/Button'
 
-interface ProjectMembersProps {
+export interface ProjectMembersProps {
   project: IItem
 }
 
