@@ -91,8 +91,28 @@ export const workspaceApi = api.injectEndpoints({
         url: `workspaces/${workspace_slug}/projects/${project_slug}/tasks/`,
         method:"GET"
       }),
+        providesTags: ['Tasks']
     }),
+     addNewTask:builder.mutation({
+      query:({workspace_slug,project_slug,title,
+  description,
+  assigned_to,
+  status,
+  due_date})=>({
+          url: `workspaces/${workspace_slug}/projects/${project_slug}/tasks/`,
+          method:"POST",
+          body:{
+          title,
+  description,
+  assigned_to,
+  status,
+  due_date
+          }
 
+      }),
+        invalidatesTags: ['Tasks']
+
+}),
     getProjectMembers: builder.query({
       query: ({ workspace_slug, project_slug }) => ({
         url: `workspaces/${workspace_slug}/projects/${project_slug}/members/`,
@@ -138,7 +158,8 @@ getTask: builder.query({
 getTaskComments: builder.query({
   query: ({ workspace_slug, project_slug, task_id, page = 1 }) =>
     `/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/comments/?page=${page}`,
-})
+}),
+
   }),
   
   
@@ -163,5 +184,6 @@ export const {
   useHandleInviteMutation,
   useAddProjectMemberMutation,
   useGetTaskQuery,
-  useGetTaskCommentsQuery
+  useGetTaskCommentsQuery,
+  useAddNewTaskMutation
 } = workspaceApi
