@@ -30,7 +30,17 @@ export const workspaceApi = api.injectEndpoints({
         url: `workspaces/${workspace_slug}/projects/`,
         method: 'GET',
       }),
+      providesTags:['Projects']
     }),
+    createWorkspaceProject: builder.mutation({
+  query: ({ workspace_slug, data }) => ({
+    url: `workspaces/${workspace_slug}/projects/`,
+    method: 'POST',
+    body: data,
+  }),
+  invalidatesTags:['Projects']
+ 
+}),
 
     getWorkspaceProjectDetail: builder.query({
       query: ({ workspace_slug, project_slug }) => ({
@@ -62,6 +72,7 @@ export const workspaceApi = api.injectEndpoints({
       ? { exclude_project }
       : undefined,
   }),
+  providesTags: ['WorkspaceMembers'],
 }),
 
     updateWorkspace: builder.mutation({
@@ -129,7 +140,7 @@ export const workspaceApi = api.injectEndpoints({
       role,
     },
   }),
-    invalidatesTags: ['ProjectMembers'],
+    invalidatesTags: ['ProjectMembers','WorkspaceMembers'],
 }),
     inviteMember: builder.mutation<
   { message: string },
@@ -220,5 +231,6 @@ export const {
   useAddNewTaskMutation,
   useAddCommentMutation,
   useUpdateTaskStatusMutation,
-  useAddCommentReactionMutation
+  useAddCommentReactionMutation,
+  useCreateWorkspaceProjectMutation
 } = workspaceApi
