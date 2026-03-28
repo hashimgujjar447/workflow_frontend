@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useGetWorkspaceProjectsQuery, useCreateWorkspaceProjectMutation } from '@/store/services/workspaceApi'
 import { IProject } from '@/types/project'
 import { useState } from 'react'
+import { usePermission } from '@/hooks/usePermissions'
 
 const WorkspaceProjects = () => {
   const router = useRouter()
@@ -19,6 +20,7 @@ const WorkspaceProjects = () => {
   })
 
   const [createProject, { isLoading: creating }] = useCreateWorkspaceProjectMutation()
+  const{isLoading:permissionLoading,canCreateProject}=usePermission(slug)
 
   // ✅ modal state
   const [open, setOpen] = useState(false)
@@ -40,7 +42,7 @@ const WorkspaceProjects = () => {
     }
   }
 
-  if (isLoading) return <p>Loading projects...</p>
+  if (isLoading || permissionLoading) return <p>Loading projects...</p>
 
   return (
     <div className="mt-7">
@@ -48,12 +50,14 @@ const WorkspaceProjects = () => {
         <h1 className="text-sm font-semibold">All available projects</h1>
 
         {/* ✅ button */}
-        <Button
+       {canCreateProject && (
+         <Button
           onClick={() => setOpen(true)}
           className="bg-cards text-black rounded border-custom_border border hover:text-white"
         >
           <Plus size={16} /> Create New Project
         </Button>
+       )}
       </div>
 
       {/* ✅ modal */}

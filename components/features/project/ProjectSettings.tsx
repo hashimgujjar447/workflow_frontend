@@ -8,6 +8,7 @@ import {
 
 import { useSelector } from 'react-redux'
 import { useWorkspace } from '@/context/WorkspaceContext'
+import { usePermission } from '@/hooks/usePermissions'
 
 const ProjectSettings = () => {
   const params = useParams()
@@ -27,6 +28,8 @@ const ProjectSettings = () => {
 
   const [deleteProject, { isLoading: isDeleting }] =
     useDeleteProjectMutation()
+
+    const{isLoading:permissionLoading,canDeleteProject,canUpdateProject}=usePermission(workspaceSlug,projectSlug)
 
   // set initial name
   useEffect(() => {
@@ -76,7 +79,7 @@ const ProjectSettings = () => {
     }
   }
 
-  if (!selectedProject) return <div>Loading project...</div>
+  if (!selectedProject || permissionLoading) return <div>Loading project...</div>
 
   return (
     <div className="max-w-xl space-y-6">
@@ -90,8 +93,9 @@ const ProjectSettings = () => {
         <p className="text-sm text-gray-500 mt-2">Total Members</p>
         <p>{selectedProject?.total_members}</p>
       </div>
-
-      {/* ✏️ Edit Name */}
+ {canUpdateProject && (
+  
+      
       <div className="p-4 border rounded-lg space-y-3">
         <h3 className="font-medium">Edit Project Name</h3>
 
@@ -101,7 +105,6 @@ const ProjectSettings = () => {
           onChange={(e) => setName(e.target.value)}
           className="w-full border px-3 py-2 rounded"
         />
-
         <button
           onClick={handleUpdate}
           disabled={isUpdating}
@@ -109,10 +112,14 @@ const ProjectSettings = () => {
         >
           {isUpdating ? 'Updating...' : 'Update'}
         </button>
-      </div>
 
-      {/* 🗑️ Delete */}
-      <div className="p-4 border rounded-lg">
+       
+      </div>
+ )}
+      
+
+     {canDeleteProject && ( 
+       <div className="p-4 border rounded-lg">
         <h3 className="font-medium text-red-600">Danger Zone</h3>
 
         <button
@@ -123,6 +130,8 @@ const ProjectSettings = () => {
           {isDeleting ? 'Deleting...' : 'Delete Project'}
         </button>
       </div>
+     
+    )}
     </div>
   )
 }

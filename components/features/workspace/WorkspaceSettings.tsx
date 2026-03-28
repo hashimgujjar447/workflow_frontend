@@ -7,13 +7,14 @@ import {
   useUpdateWorkspaceMutation,
   useDeleteWorkspaceMutation,
 } from '@/store/services/workspaceApi'
+import { usePermission } from '@/hooks/usePermissions.js'
 
 const WorkspaceSettings = () => {
   const params = useParams()
   const router = useRouter()
-  const slug = params.slug
+  const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug
 
-  const { data, isLoading } = useGetSingleWorkspaceQuery(slug, {
+  const { data, isLoading: workspaceLoading } = useGetSingleWorkspaceQuery(slug, {
     skip: !slug,
   })
 
@@ -22,14 +23,22 @@ const WorkspaceSettings = () => {
 
   const [name, setName] = useState('')
 
-  // set initial value
+  const {
+    isLoading: permissionLoading,
+    canDeleteWorkspace,
+    canUpdateWorkspace
+  } = usePermission(slug)
+
+  
+  
   useEffect(() => {
-    if (data) {
+    if (data?.name) {
       setName(data.name)
     }
   }, [data])
 
   const handleUpdate = async () => {
+    if (!slug) return
     try {
       await updateWorkspace({ slug, name }).unwrap()
       alert('Workspace updated ✅')
@@ -39,8 +48,8 @@ const WorkspaceSettings = () => {
   }
 
   const handleDelete = async () => {
+    if (!slug) return
     const confirmDelete = confirm('Are you sure?')
-
     if (!confirmDelete) return
 
     try {
@@ -52,15 +61,13 @@ const WorkspaceSettings = () => {
     }
   }
 
-  if (isLoading) return <p>Loading...</p>
+  if (workspaceLoading || permissionLoading) return <p>Loading...</p>
 
   return (
     <div className="mt-7 max-w-xl">
       <h1 className="text-sm font-semibold">Workspace Settings</h1>
 
       <div className="mt-4 space-y-4">
-
-        {/* Name */}
         <div>
           <label className="text-xs text-gray-500">Workspace Name</label>
           <input
@@ -70,27 +77,29 @@ const WorkspaceSettings = () => {
           />
         </div>
 
-        {/* Stats */}
         <div className="text-xs text-gray-500">
           <p>Total Members: {data?.total_members}</p>
           <p>Total Projects: {data?.total_projects}</p>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3">
-          <button
+       {canUpdateWorkspace && (
+           <button
             onClick={handleUpdate}
             className="bg-blue-500 text-white px-4 py-2 rounded text-sm"
           >
             Save Changes
           </button>
+       )}
 
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 text-white px-4 py-2 rounded text-sm"
-          >
-            Delete Workspace
-          </button>
+          {canDeleteWorkspace && (
+            <button
+              onClick={handleDelete}
+              className="bg-red-500 text-white px-4 py-2 rounded text-sm"
+            >
+              Delete Workspace
+            </button>
+          )}
         </div>
       </div>
     </div>

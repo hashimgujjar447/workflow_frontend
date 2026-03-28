@@ -50,7 +50,7 @@ const [dueDate, setDueDate] = useState('')
     { skip: !workspace_slug || !project_slug }
   )
 
-  console.log(members)
+
 
   const tasksData: IGroupedTasks = data ?? {
     todo: [],
@@ -87,7 +87,7 @@ const [dueDate, setDueDate] = useState('')
   if (error) {
     return <div className="mt-5 text-red-500 text-sm">Failed to load tasks</div>
   }
-console.log(tasksData)
+
   const columns = [
     { id: 'todo', title: 'To Do', color: 'bg-todo', tasks: tasksData.todo },
     { id: 'inprogress', title: 'In Progress', color: 'bg-info', tasks: tasksData.inprogress },

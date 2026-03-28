@@ -5,15 +5,19 @@ import { useState } from 'react'
 import { useGetWorkspaceMembersQuery, useInviteMemberMutation } from '@/store/services/workspaceApi'
 import { IWorkspaceMember } from '@/types/workspace'
 import { Button } from '@/components/ui/Button'
+import { usePermission } from '@/hooks/usePermissions'
 
 const WorkspaceMembers = () => {
   const params = useParams()
   const slug = params?.slug as string
-  console.log(slug)
 
   const { data, isLoading, error } = useGetWorkspaceMembersQuery({workspace_slug:slug}, {
     skip: !slug,
   })
+
+  const {isLoading:permissionLoading,canAddWorkspaceMembers}=usePermission(slug)
+
+  console.log(canAddWorkspaceMembers)
 
   const [inviteMember, { isLoading: inviteLoading }] = useInviteMemberMutation()
 
@@ -38,14 +42,14 @@ const WorkspaceMembers = () => {
     }
   }
 
-  if (isLoading) return <p>Loading members...</p>
+  if (isLoading || permissionLoading) return <p>Loading members...</p>
   if (error) return <p>Error loading members</p>
 
   return (
     <div className="mt-7">
       <div className='flex items-center justify-between'>
         <h1 className="text-sm font-semibold">Workspace Members</h1>
-        <Button onClick={() => setIsOpen(true)}>Add New Member</Button>
+        {canAddWorkspaceMembers && (<Button onClick={() => setIsOpen(true)}>Add New Member</Button>)}
       </div>
 
       <div className="mt-4 space-y-3">

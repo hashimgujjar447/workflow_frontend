@@ -7,6 +7,7 @@ interface IProject {
   created_at?: string
   is_active?: boolean
   status?: string
+  total_members?:number
 }
 interface IWorkspaceContext {
   selectedItem: string

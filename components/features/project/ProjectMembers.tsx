@@ -8,6 +8,7 @@ import {
 import { useParams } from 'next/navigation'
 import { IItem, IProjectMember } from '@/types/project'
 import { Button } from '@/components/ui/Button'
+import { usePermission } from '@/hooks/usePermissions'
 
 export interface ProjectMembersProps {
   project: IItem
@@ -46,11 +47,11 @@ const ProjectMembers = ({ project }: ProjectMembersProps) => {
       skip: !workspaceSlug,
     }
   )
-  console.log(workspaceMembers)
+
 
   const [addMember, { isLoading: isAdding }] = useAddProjectMemberMutation()
+  const{canAddProjectMembers,isLoading:permissionLoading}=usePermission(workspaceSlug,projectSlug);
 
-  // ✅ FIXED FUNCTION
   const handleAddMember = async () => {
     if (!selectedUser || !role) {
       alert('Please select user and role')
@@ -73,7 +74,7 @@ const ProjectMembers = ({ project }: ProjectMembersProps) => {
     }
   }
 
-  if (isLoading) return <div>Loading members...</div>
+  if (isLoading || permissionLoading) return <div>Loading members...</div>
 
   if (isError) {
     return <p>Failed to load members</p>
@@ -83,7 +84,7 @@ const ProjectMembers = ({ project }: ProjectMembersProps) => {
     <div className="space-y-4">
       <div className="mt-3 flex items-center justify-between">
         <h3 className="text-lg font-semibold">Project Members</h3>
-        <Button onClick={() => setIsOpen(true)}>Add New Member</Button>
+        {canAddProjectMembers && ( <Button onClick={() => setIsOpen(true)}>Add New Member</Button>)}
       </div>
 
       {members?.length === 0 && <p>No members found</p>}
