@@ -1,8 +1,33 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { ThumbsUp, ThumbsDown } from 'lucide-react'
+import { useAddCommentReactionMutation } from '@/store/services/workspaceApi'
+import { useParams } from 'next/navigation'
 
 const CommentCard = ({ comment, depth = 0, onReply }: any) => {
+  const params=useParams()
+    const { slug, project_slug, task_id } = params as {
+    slug: string
+    project_slug: string
+    task_id: string
+  }
+
+  const[addReaction]=useAddCommentReactionMutation()
+ 
+
+  const handleReaction = async (type:string) => {
+  try {
+    await addReaction({
+      workspace_slug:slug,
+      project_slug,
+      task_id,
+      comment_id: comment.id,
+      reaction: type
+    })
+  } catch (err) {
+    console.error(err)
+  }
+}
   return (
     <div
       className={`bg-white rounded-2xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition duration-200 ${
@@ -34,15 +59,16 @@ const CommentCard = ({ comment, depth = 0, onReply }: any) => {
       {/* ACTIONS (YouTube style) */}
       <div className="flex items-center gap-4 ml-12 mt-3 text-gray-500 text-sm">
         
-        {/* Like */}
-        <button className="flex items-center gap-1 hover:text-blue-600 transition">
+        {/* Like */} 
+        <button onClick={()=>handleReaction('like')} className={comment.user_reaction === 'like' ? 'text-blue-600 flex items-center gap-1' : 'flex items-center gap-1 hover:text-blue-600 transition'}>
           <ThumbsUp size={16} />
-          <span>0</span>
+          <span>{comment?.likes}</span>
         </button>
 
         {/* Dislike */}
-        <button className="hover:text-red-500 transition">
+        <button onClick={()=> handleReaction('dislike')}  className={comment.user_reaction === 'dislike' ? 'text-red-500 flex items-center gap-1' : 'hover:text-red-500 transition flex items-center gap-1'} >
           <ThumbsDown size={16} />
+          <span>{comment?.dislikes}</span>
         </button>
 
         {/* Reply */}

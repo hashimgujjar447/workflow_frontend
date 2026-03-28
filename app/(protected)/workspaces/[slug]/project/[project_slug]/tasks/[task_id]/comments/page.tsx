@@ -33,6 +33,7 @@ const page = () => {
     project_slug,
     task_id,
   })
+  console.log(data)
 
   // ✅ Mutation
   const [addComment, { isLoading: isSubmitting }] =

@@ -179,6 +179,19 @@ addComment: builder.mutation({
 
   invalidatesTags: ['TaskComments'],
 }),
+addCommentReaction: builder.mutation({
+  query: ({ workspace_slug, project_slug, task_id,comment_id,reaction }) =>({
+      url:`/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/comments/${comment_id}/reaction/`,
+         method:"POST",
+         body:{
+           reaction
+         }
+  })
+  
+  ,
+  invalidatesTags: ['TaskComments'],
+}),
+
   }),
   
   
@@ -206,5 +219,6 @@ export const {
   useGetTaskCommentsQuery,
   useAddNewTaskMutation,
   useAddCommentMutation,
-  useUpdateTaskStatusMutation
+  useUpdateTaskStatusMutation,
+  useAddCommentReactionMutation
 } = workspaceApi

@@ -1,36 +1,200 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 Workflow Frontend
 
-## Getting Started
+A modern workflow management frontend built with **Next.js App Router**, **Redux Toolkit**, and **RTK Query**.
+This project provides a structured dashboard experience for managing workspaces, projects, and tasks.
 
-First, run the development server:
+---
+
+## 📌 Overview
+
+* Users are automatically redirected to `/dashboard` from the root.
+* Global layout includes:
+
+  * Redux Provider
+  * Authentication bootstrap
+  * Sidebar + Topbar layout
+* Fully protected routing system for authenticated users.
+
+---
+
+## ⚙️ Tech Stack
+
+* **Next.js (App Router)**
+* **Redux Toolkit**
+* **RTK Query**
+* **TypeScript**
+* **Tailwind CSS (UI styling)**
+
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Install dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2️⃣ Setup backend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Make sure your backend is running at:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+http://localhost:8000/api/
+```
 
-## Learn More
+This is required for:
 
-To learn more about Next.js, take a look at the following resources:
+* Authentication
+* Token refresh flow
+* API requests
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3️⃣ Run development server
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm dev
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📜 Available Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command    | Description              |
+| ---------- | ------------------------ |
+| pnpm dev   | Start development server |
+| pnpm build | Build for production     |
+| pnpm lint  | Run ESLint               |
+
+---
+
+## 🧠 Architecture
+
+### 🔐 Authentication Flow
+
+* `AuthInitializer`:
+
+  * Refreshes tokens on app load
+  * Fetches user profile
+  * Hydrates Redux state
+
+* `ProtectedRoute`:
+
+  * Blocks unauthenticated access
+  * Redirects to `/login`
+
+---
+
+### 📦 State Management
+
+* Redux Store contains:
+
+  * `auth` slice
+  * `api` slice (RTK Query)
+
+* APIs:
+
+  * `authApi` → login & auth
+  * `workspaceApi` → workspaces, tasks, projects, etc.
+
+---
+
+## 🔗 Features
+
+* ✅ Authentication (Login + Register UI)
+* ✅ Protected Routes
+* ✅ Workspace Management
+* ✅ Task Dashboard
+* ✅ Sidebar Navigation
+* ✅ Global State Management
+* ✅ API Integration with Auto Re-auth
+
+---
+
+## 🖥️ UI Experience
+
+* 📊 Dashboard:
+
+  * Workspaces overview
+  * Tasks (All + Assigned)
+
+* 📁 Sidebar:
+
+  * Navigation across sections
+  * Mobile responsive toggle
+
+* 🔝 TopBar:
+
+  * Workspace selector
+  * Search
+  * Notifications
+
+---
+
+## 📂 Project Structure
+
+```
+app/
+ ├── (auth)/         # Login & Register
+ ├── (protected)/    # Dashboard & app pages
+
+components/
+ ├── layouts/        # Layout & TopBar
+ ├── ui/             # Reusable UI components
+
+store/
+ ├── services/       # RTK Query APIs
+ ├── store.ts        # Redux store
+
+context/             # Workspace context
+hooks/               # Custom hooks
+types/               # TypeScript types
+```
+
+---
+
+## 🔄 API & Auth Behavior
+
+* Login returns access token → stored in Redux
+* Token refresh handled automatically
+* Backend must support:
+
+  * `/token/refresh/`
+  * HttpOnly cookies
+
+---
+
+## ⚠️ Important Notes
+
+* Backend **must** support refresh tokens via cookies
+* Registration is currently UI-only (not connected to API)
+* Extend features easily using:
+
+  * `workspaceApi`
+  * `(protected)` routes
+
+---
+
+## 🛠️ Future Improvements
+
+* 🔹 Complete registration API integration
+* 🔹 Notifications system
+* 🔹 Role-based access control
+* 🔹 Real-time updates (WebSockets)
+
+---
+
+## 🤝 Contributing
+
+Feel free to fork this repo and submit a pull request.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 💡 Author
+
+Developed by **Hashim Gujjar**
