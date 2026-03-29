@@ -117,7 +117,6 @@ const ProjectSettings = () => {
       </div>
  )}
       
-
      {canDeleteProject && ( 
        <div className="p-4 border rounded-lg">
         <h3 className="font-medium text-red-600">Danger Zone</h3>

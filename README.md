@@ -1,132 +1,115 @@
-# 🚀 Workflow Frontend
+# 🚀 WorkflowHub – Task & Workspace Management System
 
-A modern workflow management frontend built with **Next.js App Router**, **Redux Toolkit**, and **RTK Query**.
-This project provides a structured dashboard experience for managing workspaces, projects, and tasks.
-
----
-
-## 📌 Overview
-
-* Users are automatically redirected to `/dashboard` from the root.
-* Global layout includes:
-
-  * Redux Provider
-  * Authentication bootstrap
-  * Sidebar + Topbar layout
-* Fully protected routing system for authenticated users.
+WorkflowHub is a modern, scalable **Task Management SaaS application** built with **Next.js, Redux Toolkit, and Tailwind CSS**.
+It allows teams to manage **workspaces, projects, tasks, members, and permissions** efficiently.
 
 ---
 
-## ⚙️ Tech Stack
+## ✨ Features
+
+### 🔐 Authentication & Security
+
+* JWT-based authentication with refresh token support
+* Auto token refresh system (silent login)
+* Protected routes with redirect support
+* Persistent login state using Redux
+
+---
+
+### 🧑‍💼 Workspace Management
+
+* Create, update, and delete workspaces
+* Invite members via email
+* View all workspace members
+* Role-based access control for workspace actions
+
+---
+
+### 📁 Project Management
+
+* Create and manage multiple projects inside a workspace
+* Assign members with roles (Manager, Leader, Developer, etc.)
+* Update or delete projects (permission-based)
+
+---
+
+### ✅ Task Management
+
+* Kanban-style task board (To Do, In Progress, Failed, Completed)
+* Create tasks with:
+
+  * Title
+  * Description
+  * Assigned user
+  * Status
+  * Due date
+* Update task status dynamically
+* Task detail page with full metadata
+
+---
+
+### 💬 Comments System
+
+* Add comments on tasks
+* Nested replies (threaded comments)
+* Like / Dislike reactions on comments
+* Dedicated comments page
+
+---
+
+### 📊 Dashboard
+
+* Overview of:
+
+  * Workspaces
+  * Recent tasks
+  * Assigned tasks
+* Quick navigation into workspaces
+
+---
+
+### 🧠 Permission System (Advanced 🔥)
+
+* Role-based permission handling
+* Separate permissions for:
+
+  * Workspace
+  * Project
+
+Example permissions:
+
+* Create project
+* Add members
+* Update/delete workspace
+* Update/delete project
+
+All UI actions are conditionally rendered based on permissions.
+
+---
+
+### 🎨 UI & UX
+
+* Fully responsive layout (mobile + desktop)
+* Sidebar navigation
+* Dynamic topbars (workspace & project level)
+* Custom design system with Tailwind CSS
+* Reusable UI components (Button, Select, Cards)
+
+---
+
+## 🏗️ Architecture
+
+### 🔹 Frontend
 
 * **Next.js (App Router)**
-* **Redux Toolkit**
-* **RTK Query**
+* **React (Client Components)**
 * **TypeScript**
-* **Tailwind CSS (UI styling)**
 
----
+### 🔹 State Management
 
-## 🚀 Getting Started
-
-### 1️⃣ Install dependencies
-
-```bash
-pnpm install
-```
-
-### 2️⃣ Setup backend
-
-Make sure your backend is running at:
-
-```
-http://localhost:8000/api/
-```
-
-This is required for:
-
-* Authentication
-* Token refresh flow
-* API requests
-
-### 3️⃣ Run development server
-
-```bash
-pnpm dev
-```
-
----
-
-## 📜 Available Scripts
-
-| Command    | Description              |
-| ---------- | ------------------------ |
-| pnpm dev   | Start development server |
-| pnpm build | Build for production     |
-| pnpm lint  | Run ESLint               |
-
----
-
-## 🧠 Architecture
-
-### 🔐 Authentication Flow
-
-* `AuthInitializer`:
-
-  * Refreshes tokens on app load
-  * Fetches user profile
-  * Hydrates Redux state
-
-* `ProtectedRoute`:
-
-  * Blocks unauthenticated access
-  * Redirects to `/login`
-
----
-
-### 📦 State Management
-
-* Redux Store contains:
-
-  * `auth` slice
-  * `api` slice (RTK Query)
-
-* APIs:
-
-  * `authApi` → login & auth
-  * `workspaceApi` → workspaces, tasks, projects, etc.
-
----
-
-## 🔗 Features
-
-* ✅ Authentication (Login + Register UI)
-* ✅ Protected Routes
-* ✅ Workspace Management
-* ✅ Task Dashboard
-* ✅ Sidebar Navigation
-* ✅ Global State Management
-* ✅ API Integration with Auto Re-auth
-
----
-
-## 🖥️ UI Experience
-
-* 📊 Dashboard:
-
-  * Workspaces overview
-  * Tasks (All + Assigned)
-
-* 📁 Sidebar:
-
-  * Navigation across sections
-  * Mobile responsive toggle
-
-* 🔝 TopBar:
-
-  * Workspace selector
-  * Search
-  * Notifications
+* Redux Toolkit
+* RTK Query (API layer)
+* Context API (for workspace/project UI state)
 
 ---
 
@@ -134,67 +117,195 @@ pnpm dev
 
 ```
 app/
- ├── (auth)/         # Login & Register
- ├── (protected)/    # Dashboard & app pages
+ ├── dashboard/
+ ├── workspaces/
+ │    ├── [slug]/
+ │    │    ├── project/
+ │    │    │    ├── [project_slug]/
+ │    │    │    │    ├── tasks/
+ │    │    │    │    └── ...
+ │    │    └── ...
+ ├── login/
+ ├── register/
 
 components/
- ├── layouts/        # Layout & TopBar
- ├── ui/             # Reusable UI components
+ ├── layouts/
+ ├── ui/
+ ├── features/
 
 store/
- ├── services/       # RTK Query APIs
- ├── store.ts        # Redux store
+ ├── api/
+ ├── services/
+ ├── slices/
 
-context/             # Workspace context
-hooks/               # Custom hooks
-types/               # TypeScript types
+context/
+ └── WorkspaceContext
+
+hooks/
+ ├── usePermission
+ ├── useWorkspaceRole
+ └── useProjectRole
 ```
 
 ---
 
-## 🔄 API & Auth Behavior
+## 🔌 API Layer (RTK Query)
 
-* Login returns access token → stored in Redux
-* Token refresh handled automatically
-* Backend must support:
+* Centralized API using `createApi` 
+* Auto caching with tags:
 
-  * `/token/refresh/`
-  * HttpOnly cookies
-
----
-
-## ⚠️ Important Notes
-
-* Backend **must** support refresh tokens via cookies
-* Registration is currently UI-only (not connected to API)
-* Extend features easily using:
-
-  * `workspaceApi`
-  * `(protected)` routes
+  * Workspaces
+  * Projects
+  * Tasks
+  * Members
+* Auto refetch after mutations
 
 ---
 
-## 🛠️ Future Improvements
+## 🔄 Token Refresh System
 
-* 🔹 Complete registration API integration
-* 🔹 Notifications system
-* 🔹 Role-based access control
-* 🔹 Real-time updates (WebSockets)
+* Custom `baseQueryWithReauth` handles:
 
----
-
-## 🤝 Contributing
-
-Feel free to fork this repo and submit a pull request.
+  * Expired tokens
+  * Automatic refresh
+  * Retry original request
+* Logout fallback on failure 
 
 ---
 
-## 📄 License
+## 🧠 State Management
 
-This project is licensed under the MIT License.
+### Auth Slice
+
+* Stores:
+
+  * User
+  * Token
+  * Initialization state
+* Handles login, logout, loading states 
 
 ---
 
-## 💡 Author
+### Workspace Context
 
-Developed by **Hashim Gujjar**
+* Manages:
+
+  * Selected tab (Projects / Members / Settings)
+  * Selected project
+* Used for UI state across pages 
+
+---
+
+## 🔐 Permission System (Core Feature)
+
+Custom hook:
+
+```ts
+usePermission(workspace_slug, project_slug)
+```
+
+Returns:
+
+* Workspace permissions:
+
+  * canCreateProject
+  * canUpdateWorkspace
+  * canDeleteWorkspace
+  * canAddWorkspaceMembers
+
+* Project permissions:
+
+  * canUpdateProject
+  * canDeleteProject
+  * canAddProjectMembers
+
+👉 Used across UI to:
+
+* Hide buttons
+* Restrict actions
+* Control access
+
+---
+
+## 📦 Key Components
+
+### Dashboard
+
+* Workspace cards
+* Recent tasks
+* Assigned tasks  
+
+---
+
+### Workspace
+
+* Projects list
+* Members management
+* Settings panel   
+
+---
+
+### Project
+
+* Task board (Kanban)
+* Members
+* Settings   
+
+---
+
+### Task
+
+* Detail view
+* Status update
+* Comments system
+
+---
+
+## ⚙️ Installation
+
+```bash
+git clone https://github.com/your-username/workflowhub.git
+cd workflowhub
+
+npm install
+
+npm run dev
+```
+
+---
+
+## 🌐 Environment
+
+Make sure backend API is running at:
+
+```
+http://localhost:8000/api/
+```
+
+---
+
+## 🚀 Future Improvements
+
+* Notifications system
+* Real-time updates (WebSockets)
+* Drag & drop tasks
+* File attachments
+* Activity logs
+
+---
+
+## 👨‍💻 Author
+
+Developed by [Your Name]
+
+---
+
+## ⭐ Final Note
+
+This project demonstrates:
+
+* Scalable frontend architecture
+* Real-world SaaS features
+* Advanced state + permission handling
+
+👉 Perfect for portfolio & production-level applications.
