@@ -1,10 +1,15 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import { Calendar, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useGetProjectMembersQuery, useGetProjectTasksQuery, useAddNewTaskMutation } from '@/store/services/workspaceApi'
 import { useParams, useRouter } from 'next/navigation'
+import { useDispatch} from 'react-redux'
+
+import { workspaceApi } from '@/store/services/workspaceApi'
+import { useAppDispatch } from '@/hooks/hooks'
+import { useSocket } from '@/context/SocketContext'
 
 type TaskStatus = 'todo' | 'inprogress' | 'failed' | 'completed'
 
@@ -27,7 +32,8 @@ interface IGroupedTasks {
 const ProjectTasks = () => {
   const params = useParams()
   const router = useRouter()
-
+  const dispatch=useAppDispatch()
+const socket=useSocket()
   const [openAddTaskMenu, setOpenAddTaskMenu] = useState(false)
   const [assignedUser, setAssignedUser] = useState<any>("")
   const [title, setTitle] = useState<string>('')
@@ -50,6 +56,7 @@ const [dueDate, setDueDate] = useState('')
     { skip: !workspace_slug || !project_slug }
   )
 
+ 
 
 
   const tasksData: IGroupedTasks = data ?? {
@@ -59,6 +66,96 @@ const [dueDate, setDueDate] = useState('')
     completed: [],
   }
 
+   useEffect(()=>{
+        if(!socket) return
+
+       socket.onmessage = (e) => {
+  const data = JSON.parse(e.data)
+  if(data.event==="task_created"){
+      dispatch(
+    workspaceApi.util.updateQueryData(
+      "getProjectTasks",
+      { workspace_slug, project_slug },
+      (draft) => {
+        const exists =
+        draft.todo.find(t => t.id === data.id) ||
+        draft.inprogress.find(t => t.id === data.id) ||
+        draft.completed.find(t => t.id === data.id) ||
+        draft.failed.find(t => t.id === data.id)
+
+        if (exists) return
+
+        const task = {
+          id: data.id,
+          title: data.title,
+          status: data.status
+        }
+
+        if (task.status === "todo") {
+          draft.todo.unshift(task)
+        }
+
+        if (task.status === "in_progress") {
+          draft.inprogress.unshift(task)
+        }
+
+        if (task.status === "completed") {
+          draft.completed.unshift(task)
+        }
+
+        if (task.status === "failed") {
+          draft.failed.unshift(task)
+        }
+      }
+    )
+  )
+
+  }else if(data.event=="task_updated"){
+    
+        dispatch(
+          workspaceApi.util.updateQueryData(
+            "getProjectTasks",
+      { workspace_slug, project_slug },
+            (draft) => {
+
+              const lists = [
+                draft.todo,
+                draft.inprogress,
+                draft.completed,
+                draft.failed
+              ]
+
+              let taskToMove = null
+
+              // remove from old list
+              for (const list of lists) {
+                const index = list.findIndex(t => t.id === data.id)
+                if (index !== -1) {
+                  taskToMove = list[index]
+                  list.splice(index, 1)
+                  break
+                }
+              }
+
+              if (!taskToMove) return
+
+              taskToMove.status = data.status
+
+              console.log(taskToMove)
+
+             
+              if (data.status === "todo") draft.todo.unshift(taskToMove)
+              if (data.status === "in_progress") draft.inprogress.unshift(taskToMove)
+              if (data.status === "completed") draft.completed.unshift(taskToMove)
+              if (data.status === "failed") draft.failed.unshift(taskToMove)
+            }
+          )
+        )
+  }
+
+}
+
+  },[socket,project_slug,workspace_slug])
   const handleAddNewTask = async () => {
     try {
       await addNewTask({
