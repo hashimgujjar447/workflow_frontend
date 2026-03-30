@@ -1,5 +1,6 @@
 'use client'
-import React, { useState } from 'react'
+
+import React, { useEffect, useState } from 'react'
 import {
   useGetTaskCommentsQuery,
   useGetTaskQuery,
@@ -8,9 +9,14 @@ import {
 import { useParams } from 'next/navigation'
 import CommentCard from '@/components/features/tasks/CommentCard'
 import CommentModal from '@/components/features/tasks/AddCommentModel'
+import { useSocket } from '@/context/SocketContext'
+import { workspaceApi } from '@/store/services/workspaceApi'
+import { useAppDispatch } from '@/hooks/hooks'
 
-const page = () => {
+const Page = () => {
   const params = useParams()
+  const socket = useSocket()
+  const dispatch = useAppDispatch()
 
   const [parentId, setParentId] = useState<number | null>(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -21,7 +27,7 @@ const page = () => {
     task_id: string
   }
 
-  // ✅ Queries
+  // Queries
   const { data: task, isLoading } = useGetTaskQuery({
     workspace_slug: slug,
     project_slug,
@@ -33,13 +39,85 @@ const page = () => {
     project_slug,
     task_id,
   })
-  console.log(data)
 
-  // ✅ Mutation
+  // Mutation
   const [addComment, { isLoading: isSubmitting }] =
     useAddCommentMutation()
 
-  // ✅ Submit Handler
+  // Normalize socket data
+  const normalizeComment = (data: any) => ({
+    id: data.id,
+    content: data.content,
+    created_at: new Date().toISOString(),
+    author: {
+      first_name: data.author,
+      last_name: '',
+    },
+    parent_comment: data.parent_comment,
+    replies: [],
+    likes: 0,
+    dislikes: 0,
+    user_reaction: null,
+  })
+
+  // Socket listener
+  useEffect(() => {
+    if (!socket) return
+
+    const handler = (e: MessageEvent) => {
+      const data = JSON.parse(e.data)
+      console.log('SOCKET DATA:', data)
+
+      if (data.event === 'comment_created') {
+        const newComment = normalizeComment(data)
+
+        dispatch(
+          workspaceApi.util.updateQueryData(
+            'getTaskComments',
+            { workspace_slug: slug, project_slug, task_id },
+            (draft: any) => {
+              if (!draft?.results) return
+
+              // prevent duplicates
+              const exists = draft.results.some(
+                (c: any) => c.id === newComment.id
+              )
+              if (exists) return
+
+              let isReply = false
+
+              const addReplyRecursive = (comments: any[]): boolean => {
+                for (let c of comments) {
+                  if (c.id === newComment.parent_comment) {
+                    c.replies.push(newComment)
+                    return true
+                  }
+                  if (addReplyRecursive(c.replies)) return true
+                }
+                return false
+              }
+
+              if (newComment.parent_comment) {
+                isReply = addReplyRecursive(draft.results)
+              }
+
+              if (!isReply) {
+                draft.results.unshift(newComment)
+              }
+            }
+          )
+        )
+      }
+    }
+
+    socket.addEventListener('message', handler)
+
+    return () => {
+      socket.removeEventListener('message', handler)
+    }
+  }, [socket, slug, project_slug, task_id, dispatch])
+
+  // Submit handler
   const handleSubmit = async (formData: any) => {
     try {
       await addComment({
@@ -47,13 +125,11 @@ const page = () => {
         project_slug,
         task_id,
         content: formData.content,
-        parent_comment: parentId, // 👈 IMPORTANT
+        parent_comment: parentId,
       }).unwrap()
 
-      // reset
       setIsOpen(false)
       setParentId(null)
-
     } catch (err) {
       console.error('Error adding comment:', err)
     }
@@ -65,7 +141,6 @@ const page = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      
       {/* Task Card */}
       <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -82,9 +157,8 @@ const page = () => {
         </div>
       </div>
 
-      {/* Comments Section */}
+      {/* Comments */}
       <div className="mt-8">
-        
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-800">
             💬 Comments
@@ -107,9 +181,9 @@ const page = () => {
           </p>
         )}
 
-        {data?.results?.map((comment: any, index: number) => (
+        {data?.results?.map((comment: any) => (
           <CommentCard
-            key={index}
+            key={comment.id}
             comment={comment}
             onReply={(id: number) => {
               setParentId(id)
@@ -128,10 +202,10 @@ const page = () => {
         }}
         onSubmit={handleSubmit}
         parentId={parentId}
-        isSubmitting={isSubmitting} // 👈 optional loading
+        isSubmitting={isSubmitting}
       />
     </div>
   )
 }
 
-export default page
+export default Page
