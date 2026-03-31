@@ -1,141 +1,176 @@
-# 🚀 WorkflowHub – Task & Workspace Management System
+# 🚀 WorkflowHub Frontend – Real-Time Task Management UI
 
-WorkflowHub is a modern, scalable **Task Management SaaS application** built with **Next.js, Redux Toolkit, and Tailwind CSS**.
-It allows teams to manage **workspaces, projects, tasks, members, and permissions** efficiently.
-
----
-
-## ✨ Features
-
-### 🔐 Authentication & Security
-
-* JWT-based authentication with refresh token support
-* Auto token refresh system (silent login)
-* Protected routes with redirect support
-* Persistent login state using Redux
-
----
-
-### 🧑‍💼 Workspace Management
-
-* Create, update, and delete workspaces
-* Invite members via email
-* View all workspace members
-* Role-based access control for workspace actions
-
----
-
-### 📁 Project Management
-
-* Create and manage multiple projects inside a workspace
-* Assign members with roles (Manager, Leader, Developer, etc.)
-* Update or delete projects (permission-based)
-
----
-
-### ✅ Task Management
-
-* Kanban-style task board (To Do, In Progress, Failed, Completed)
-* Create tasks with:
-
-  * Title
-  * Description
-  * Assigned user
-  * Status
-  * Due date
-* Update task status dynamically
-* Task detail page with full metadata
-
----
-
-### 💬 Comments System
-
-* Add comments on tasks
-* Nested replies (threaded comments)
-* Like / Dislike reactions on comments
-* Dedicated comments page
-
----
-
-### 📊 Dashboard
-
-* Overview of:
-
-  * Workspaces
-  * Recent tasks
-  * Assigned tasks
-* Quick navigation into workspaces
-
----
-
-### 🧠 Permission System (Advanced 🔥)
-
-* Role-based permission handling
-* Separate permissions for:
-
-  * Workspace
-  * Project
-
-Example permissions:
-
-* Create project
-* Add members
-* Update/delete workspace
-* Update/delete project
-
-All UI actions are conditionally rendered based on permissions.
-
----
-
-### 🎨 UI & UX
-
-* Fully responsive layout (mobile + desktop)
-* Sidebar navigation
-* Dynamic topbars (workspace & project level)
-* Custom design system with Tailwind CSS
-* Reusable UI components (Button, Select, Cards)
-
----
-
-## 🏗️ Architecture
-
-### 🔹 Frontend
+WorkflowHub Frontend is a **modern, scalable SaaS frontend** built with:
 
 * **Next.js (App Router)**
-* **React (Client Components)**
-* **TypeScript**
+* **Redux Toolkit + RTK Query**
+* **Tailwind CSS**
+* **WebSockets (Real-time updates)**
 
-### 🔹 State Management
+It connects with a Django backend to provide a **fully real-time collaborative experience**.
 
-* Redux Toolkit
-* RTK Query (API layer)
-* Context API (for workspace/project UI state)
+---
+
+# 🔥 Key Highlights
+
+* ⚡ Real-time UI updates (WebSockets)
+* 🧠 Advanced permission-based UI rendering
+* 🔄 Smart caching with RTK Query
+* 🔐 Secure authentication with auto-refresh tokens
+* 📊 Kanban-style task management
+
+---
+
+# ✨ Features
+
+## 🔐 Authentication
+
+* JWT authentication
+* Auto refresh token system
+* Persistent login state
+* Protected routes
+
+---
+
+## 🧑‍💼 Workspace Management
+
+* Create & manage workspaces
+* Invite members
+* Role-based UI controls
+
+---
+
+## 📁 Project Management
+
+* Multiple projects per workspace
+* Role-based member assignment
+* Permission-based actions
+
+---
+
+## ✅ Task Management
+
+* Kanban board:
+
+  * To Do
+  * In Progress
+  * Completed
+  * Failed
+* Task detail page
+* Status updates (real-time)
+
+---
+
+## 💬 Comments & Reactions (Real-Time)
+
+* Add comments
+* Nested replies
+* 👍 Like / 👎 Dislike
+* 🔄 Live updates across all users
+
+---
+
+# ⚡ Real-Time System
+
+## 🏗️ Flow
+
+```id="n8kz4f"
+User Action
+   ↓
+API Call (RTK Query)
+   ↓
+Backend Save
+   ↓
+Django Signal
+   ↓
+WebSocket Event
+   ↓
+Frontend Listener
+   ↓
+Redux State Update
+   ↓
+UI Re-render (instant)
+```
+
+---
+
+## 🔌 WebSocket Usage
+
+* Connects to:
+
+```id="t08xpy"
+ws://localhost:8000/ws/tasks/<project_slug>/
+```
+
+---
+
+## 📡 Events Handled
+
+* task_created
+* task_updated
+* comment_created
+* comment_updated
+* comment_reaction_created
+* comment_reaction_updated
+* comment_reaction_deleted
+
+---
+
+## 🧠 State Management
+
+### Redux Toolkit
+
+* Global state for auth
+* RTK Query for API caching
+
+---
+
+### RTK Query
+
+* Auto caching
+* Tag invalidation
+* Optimistic updates
+* Manual cache updates using:
+
+```ts id="q5v1dh"
+updateQueryData
+```
+
+---
+
+## 🧠 Permission System
+
+Custom hook:
+
+```ts id="2xr7vp"
+usePermission(workspace_slug, project_slug)
+```
+
+Used to:
+
+* Hide UI buttons
+* Restrict actions
+* Control access dynamically
 
 ---
 
 ## 📂 Project Structure
 
-```
+```id="0g4f3k"
 app/
  ├── dashboard/
  ├── workspaces/
- │    ├── [slug]/
- │    │    ├── project/
- │    │    │    ├── [project_slug]/
- │    │    │    │    ├── tasks/
- │    │    │    │    └── ...
- │    │    └── ...
  ├── login/
  ├── register/
 
 components/
  ├── layouts/
- ├── ui/
  ├── features/
+ ├── ui/
 
 store/
- ├── api/
  ├── services/
+ ├── api/
  ├── slices/
 
 context/
@@ -144,141 +179,37 @@ context/
 hooks/
  ├── usePermission
  ├── useWorkspaceRole
- └── useProjectRole
+ ├── useProjectRole
 ```
-
----
-
-## 🔌 API Layer (RTK Query)
-
-* Centralized API using `createApi` 
-* Auto caching with tags:
-
-  * Workspaces
-  * Projects
-  * Tasks
-  * Members
-* Auto refetch after mutations
 
 ---
 
 ## 🔄 Token Refresh System
 
-* Custom `baseQueryWithReauth` handles:
-
-  * Expired tokens
-  * Automatic refresh
-  * Retry original request
-* Logout fallback on failure 
-
----
-
-## 🧠 State Management
-
-### Auth Slice
-
-* Stores:
-
-  * User
-  * Token
-  * Initialization state
-* Handles login, logout, loading states 
-
----
-
-### Workspace Context
-
-* Manages:
-
-  * Selected tab (Projects / Members / Settings)
-  * Selected project
-* Used for UI state across pages 
-
----
-
-## 🔐 Permission System (Core Feature)
-
-Custom hook:
-
-```ts
-usePermission(workspace_slug, project_slug)
-```
-
-Returns:
-
-* Workspace permissions:
-
-  * canCreateProject
-  * canUpdateWorkspace
-  * canDeleteWorkspace
-  * canAddWorkspaceMembers
-
-* Project permissions:
-
-  * canUpdateProject
-  * canDeleteProject
-  * canAddProjectMembers
-
-👉 Used across UI to:
-
-* Hide buttons
-* Restrict actions
-* Control access
-
----
-
-## 📦 Key Components
-
-### Dashboard
-
-* Workspace cards
-* Recent tasks
-* Assigned tasks  
-
----
-
-### Workspace
-
-* Projects list
-* Members management
-* Settings panel   
-
----
-
-### Project
-
-* Task board (Kanban)
-* Members
-* Settings   
-
----
-
-### Task
-
-* Detail view
-* Status update
-* Comments system
+* Custom baseQuery
+* Auto refresh on 401
+* Retry original request
+* Logout fallback
 
 ---
 
 ## ⚙️ Installation
 
-```bash
-git clone https://github.com/your-username/workflowhub.git
-cd workflowhub
+```bash id="ib5y3h"
+git clone <repo>
+cd frontend
 
 npm install
-
 npm run dev
 ```
 
 ---
 
-## 🌐 Environment
+## 🌐 Backend Requirement
 
-Make sure backend API is running at:
+Make sure backend is running:
 
-```
+```id="ptgbml"
 http://localhost:8000/api/
 ```
 
@@ -286,26 +217,24 @@ http://localhost:8000/api/
 
 ## 🚀 Future Improvements
 
-* Notifications system
-* Real-time updates (WebSockets)
-* Drag & drop tasks
+* Drag & Drop (Kanban)
+* Notifications (real-time)
+* Activity feed
 * File attachments
-* Activity logs
+
+---
+
+# 💬 Final Note
+
+This frontend demonstrates:
+
+* Real-time UI synchronization
+* Advanced state management
+* Scalable frontend architecture
+* Clean integration with backend APIs & WebSockets
 
 ---
 
 ## 👨‍💻 Author
 
-Developed by [Your Name]
-
----
-
-## ⭐ Final Note
-
-This project demonstrates:
-
-* Scalable frontend architecture
-* Real-world SaaS features
-* Advanced state + permission handling
-
-👉 Perfect for portfolio & production-level applications.
+Built with ❤️ using Next.js & Redux Toolkit

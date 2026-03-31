@@ -11,15 +11,17 @@ import CommentCard from '@/components/features/tasks/CommentCard'
 import CommentModal from '@/components/features/tasks/AddCommentModel'
 import { useSocket } from '@/context/SocketContext'
 import { workspaceApi } from '@/store/services/workspaceApi'
-import { useAppDispatch } from '@/hooks/hooks'
+import { useAppDispatch, useAppSelector } from '@/hooks/hooks'
 
 const Page = () => {
   const params = useParams()
   const socket = useSocket()
   const dispatch = useAppDispatch()
+  const user=useAppSelector((state)=> state.auth.user)
 
   const [parentId, setParentId] = useState<number | null>(null)
   const [isOpen, setIsOpen] = useState(false)
+
 
   const { slug, project_slug, task_id } = params as {
     slug: string
@@ -27,7 +29,6 @@ const Page = () => {
     task_id: string
   }
 
-  // Queries
   const { data: task, isLoading } = useGetTaskQuery({
     workspace_slug: slug,
     project_slug,
@@ -40,11 +41,11 @@ const Page = () => {
     task_id,
   })
 
-  // Mutation
+  console.log(data)
+
   const [addComment, { isLoading: isSubmitting }] =
     useAddCommentMutation()
 
-  // Normalize socket data
   const normalizeComment = (data: any) => ({
     id: data.id,
     content: data.content,
@@ -60,15 +61,66 @@ const Page = () => {
     user_reaction: null,
   })
 
-  // Socket listener
+  // ✅ move outside for performance
+  const commentExists = (arr: any[], id: number): boolean => {
+    return arr.some((item) => {
+      if (item.id === id) return true
+      if (item?.replies?.length) {
+        return commentExists(item.replies, id)
+      }
+      return false
+    })
+  }
+
+  const addReplyRecursive = (
+    comments: any[],
+    newComment: any
+  ): boolean => {
+    for (let c of comments) {
+      if (c.id === newComment.parent_comment) {
+        c.replies = c.replies || []
+        c.replies.push(newComment)
+        return true
+      }
+
+      if (c?.replies?.length) {
+        if (addReplyRecursive(c.replies, newComment)) return true
+      }
+    }
+    return false
+  }
+const updateLikeRecursive = (comments: any[], data: any): boolean => {
+  for (let c of comments) {   
+
+    if (c.id === data.comment_id) {   
+
+      c.likes = data.likes
+      c.dislikes = data.dislikes
+
+       if(user?.id===data.user_id){
+        // optional (user reaction)
+      c.user_reaction = data.reaction
+       }
+
+      return true
+    }
+
+    if (c?.replies?.length) {
+      if (updateLikeRecursive(c.replies, data)) return true
+    }
+  }
+  return false
+}
+
   useEffect(() => {
     if (!socket) return
 
     const handler = (e: MessageEvent) => {
       const data = JSON.parse(e.data)
-      console.log('SOCKET DATA:', data)
 
       if (data.event === 'comment_created') {
+        if(data.author_id===user?.id) return
+
         const newComment = normalizeComment(data)
 
         dispatch(
@@ -76,29 +128,19 @@ const Page = () => {
             'getTaskComments',
             { workspace_slug: slug, project_slug, task_id },
             (draft: any) => {
+              
               if (!draft?.results) return
 
-              // prevent duplicates
-              const exists = draft.results.some(
-                (c: any) => c.id === newComment.id
-              )
-              if (exists) return
+              // ✅ prevent duplicates (fixed)
+              if (commentExists(draft.results, newComment.id)) return
 
               let isReply = false
 
-              const addReplyRecursive = (comments: any[]): boolean => {
-                for (let c of comments) {
-                  if (c.id === newComment.parent_comment) {
-                    c.replies.push(newComment)
-                    return true
-                  }
-                  if (addReplyRecursive(c.replies)) return true
-                }
-                return false
-              }
-
               if (newComment.parent_comment) {
-                isReply = addReplyRecursive(draft.results)
+                isReply = addReplyRecursive(
+                  draft.results,
+                  newComment
+                )
               }
 
               if (!isReply) {
@@ -107,7 +149,24 @@ const Page = () => {
             }
           )
         )
+      }else if (
+  data.event === 'comment_reaction_created' ||
+  data.event === 'comment_reaction_updated' ||
+  data.event === 'comment_reaction_deleted'
+) {
+   console.log(data)
+  dispatch(
+    workspaceApi.util.updateQueryData(
+      'getTaskComments',
+      { workspace_slug: slug, project_slug, task_id },
+      (draft:any)=>{
+        if(!draft.results) return
+
+        updateLikeRecursive(draft.results, data)
       }
+    )
+  )
+}
     }
 
     socket.addEventListener('message', handler)
@@ -115,9 +174,8 @@ const Page = () => {
     return () => {
       socket.removeEventListener('message', handler)
     }
-  }, [socket, slug, project_slug, task_id, dispatch])
+  }, [socket, slug, project_slug, task_id, dispatch, user])
 
-  // Submit handler
   const handleSubmit = async (formData: any) => {
     try {
       await addComment({
@@ -141,7 +199,6 @@ const Page = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      {/* Task Card */}
       <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
           {task?.title}
@@ -157,7 +214,6 @@ const Page = () => {
         </div>
       </div>
 
-      {/* Comments */}
       <div className="mt-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-800">
@@ -193,7 +249,6 @@ const Page = () => {
         ))}
       </div>
 
-      {/* Modal */}
       <CommentModal
         isOpen={isOpen}
         onClose={() => {

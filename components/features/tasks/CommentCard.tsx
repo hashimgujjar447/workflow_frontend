@@ -1,11 +1,14 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ThumbsUp, ThumbsDown } from 'lucide-react'
 import { useAddCommentReactionMutation } from '@/store/services/workspaceApi'
 import { useParams } from 'next/navigation'
+import { useSocket } from '@/context/SocketContext'
+import { useAppSelector } from '@/hooks/hooks'
 
 const CommentCard = ({ comment, depth = 0, onReply }: any) => {
   const params=useParams()
+
     const { slug, project_slug, task_id } = params as {
     slug: string
     project_slug: string
@@ -13,6 +16,8 @@ const CommentCard = ({ comment, depth = 0, onReply }: any) => {
   }
 
   const[addReaction]=useAddCommentReactionMutation()
+
+
  
 
   const handleReaction = async (type:string) => {
