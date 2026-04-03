@@ -13,7 +13,7 @@ export default function AuthInitializer() {
     const initAuth = async () => {
       try {
         const refreshRes = await fetch(
-          "http://localhost:8000/api/token/refresh/",
+          `${process.env.NEXT_PUBLIC_API_URL}token/refresh/`,
           {
             method: "POST",
             credentials: "include",
