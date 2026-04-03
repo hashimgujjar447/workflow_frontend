@@ -44,6 +44,7 @@ export default function AuthInitializer() {
           })
         );
       } catch (err) {
+        console.log(err)
         dispatch(logout());
       }
     };

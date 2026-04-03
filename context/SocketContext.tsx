@@ -25,7 +25,7 @@ export const WebSocketProvider = ({
 
     // 🔥 create new socket
     const newSocket = new WebSocket(
-      `ws://localhost:8000/ws/tasks/${projectSlug}/`
+      `${process.env.NEXT_PUBLIC_WS_URL}/${projectSlug}/`
     )
 
     setSocket(newSocket)

@@ -15,7 +15,7 @@ const isFetchBaseQueryError = (
   typeof (error as FetchBaseQueryError).status === "number";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:8000/api/",
+  baseUrl:process.env.NEXT_PUBLIC_API_URL,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as any).auth.token;

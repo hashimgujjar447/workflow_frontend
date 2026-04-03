@@ -3,12 +3,10 @@
 import { useParams, useRouter } from 'next/navigation'
 import { useHandleInviteMutation } from '@/store/services/workspaceApi'
 import { Button } from '@/components/ui/Button'
-import { useSelector } from 'react-redux'
-import { useEffect } from 'react'
-import { RootState } from '@/store/store'
+
 
 const InviteDetailPage = () => {
-  const user = useSelector((state: RootState) => state.auth.user)
+  
   const params = useParams()
   const token = params.token as string
   const router = useRouter()

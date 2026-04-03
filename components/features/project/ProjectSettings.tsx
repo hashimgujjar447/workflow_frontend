@@ -6,7 +6,7 @@ import {
   useDeleteProjectMutation,
 } from '@/store/services/workspaceApi'
 
-import { useSelector } from 'react-redux'
+
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { usePermission } from '@/hooks/usePermissions'
 
@@ -34,6 +34,7 @@ const ProjectSettings = () => {
   // set initial name
   useEffect(() => {
     if (selectedProject) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(selectedProject?.name)
     }
   }, [selectedProject])

@@ -8,7 +8,7 @@ const InvitesPage = () => {
   const { data, isLoading, error } = useGetInvitesQuery()
   const router = useRouter()
 
-  console.log(data)
+
 
   if (isLoading) return <p>Loading invites...</p>
   if (error) return <p>Error loading invites</p>

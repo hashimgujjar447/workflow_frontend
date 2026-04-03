@@ -8,13 +8,11 @@ import ProjectSettings from '@/components/features/project/ProjectSettings'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { useEffect } from 'react'
 import { useGetWorkspaceProjectDetailQuery } from '@/store/services/workspaceApi'
-import { IItem } from '@/types/project'
-import { WebSocketProvider } from '@/context/SocketContext'
 
 const ProjectDetail = () => {
   const params = useParams()
   const { selectedItem, setSelectedProject } = useWorkspace()
-  const project_slug=params?.project_slug
+  
 
   // ✅ API call
   const {
@@ -43,7 +41,7 @@ const ProjectDetail = () => {
       setSelectedProject(project)
     
     }
-  }, [project])
+  }, [project,setSelectedProject])
 
   
 

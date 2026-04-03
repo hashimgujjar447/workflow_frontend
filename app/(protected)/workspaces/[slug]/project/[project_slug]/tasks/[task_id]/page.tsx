@@ -30,7 +30,7 @@ const TaskDetailPage = () => {
     project_slug: string
     task_id: string
   }
-  const workspace_slug=slug
+ 
 
   const { data: task, isLoading } = useGetTaskQuery(
     {
@@ -54,7 +54,7 @@ const TaskDetailPage = () => {
       if (data.event === "task_updated") {
         
 
-        // ✅ update single task
+    
         dispatch(
           workspaceApi.util.updateQueryData(
             "getTask",

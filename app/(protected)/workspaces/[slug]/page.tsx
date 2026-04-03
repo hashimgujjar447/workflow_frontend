@@ -13,7 +13,7 @@ const WorkspacePage = () => {
     skip: !slug,
   })
 
-  console.log(data)
+
   if (isLoading) return <p>Loading...</p>
   if (error) return <p>Error...</p>
 

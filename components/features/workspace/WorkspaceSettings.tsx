@@ -31,8 +31,10 @@ const WorkspaceSettings = () => {
 
   
   
+  
   useEffect(() => {
     if (data?.name) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(data.name)
     }
   }, [data])
