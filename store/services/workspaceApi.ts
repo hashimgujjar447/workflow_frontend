@@ -96,6 +96,13 @@ export const workspaceApi = api.injectEndpoints({
         method: 'GET',
       }),
     }),
+    getAllUserTasks: builder.query({
+      query: () => ({
+        url: 'tasks/',
+        method: 'GET',
+      }),
+    }),
+
 
     getProjectTasks: builder.query({
       query: ({ workspace_slug, project_slug }) => ({
@@ -163,8 +170,11 @@ handleInvite: builder.mutation({
   }),
 }),
 getTask: builder.query({
-  query: ({ workspace_slug, project_slug, task_id }) =>
-    `/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/`,
+  query: ({ workspace_slug, project_slug, task_id }) =>({
+    url:`/workspaces/${workspace_slug}/projects/${project_slug}/tasks/${task_id}/`,
+  }),
+  providesTags:['TaskDetail']
+
 }),
 updateTaskStatus: builder.mutation({
   query: ({ workspace_slug, project_slug, task_id, status }) => ({
@@ -188,7 +198,7 @@ addComment: builder.mutation({
     body, 
   }),
 
-  invalidatesTags: ['TaskComments'],
+  invalidatesTags: ['TaskComments','TaskDetail'],
 }),
 addCommentReaction: builder.mutation({
   query: ({ workspace_slug, project_slug, task_id,comment_id,reaction }) =>({
@@ -232,5 +242,6 @@ export const {
   useAddCommentMutation,
   useUpdateTaskStatusMutation,
   useAddCommentReactionMutation,
-  useCreateWorkspaceProjectMutation
+  useCreateWorkspaceProjectMutation,
+  useGetAllUserTasksQuery
 } = workspaceApi

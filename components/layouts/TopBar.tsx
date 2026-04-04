@@ -54,14 +54,14 @@ const TopBar = ({ workspaces }: any) => {
         )}
       </div>
 
-      <div className='flex items-center gap-x-4'>
+      <div className='flex items-center  sm:gap-x-4'>
         <input
           type="text"
-          className='outline-none border border-border p-1 rounded'
+          className='outline-none border w-40 border-border p-1 rounded'
           placeholder='Search'
         />
-        <BellRing />
-        <div className='bg-black rounded-full text-sidebar-text h-8 flex items-center justify-center w-8'>
+        <BellRing className='hidden sm:inline-block' />
+        <div className='bg-black hidden rounded-full text-sidebar-text h-8 sm:flex items-center justify-center w-8'>
           M
         </div>
       </div>

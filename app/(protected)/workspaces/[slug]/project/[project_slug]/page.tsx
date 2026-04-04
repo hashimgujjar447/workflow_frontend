@@ -11,14 +11,15 @@ import { useGetWorkspaceProjectDetailQuery } from '@/store/services/workspaceApi
 
 const ProjectDetail = () => {
   const params = useParams()
-  const { selectedItem, setSelectedProject } = useWorkspace()
-  
 
-  // ✅ API call
+  const { projectTab, setSelectedProject } = useWorkspace()
+
   const {
     data: project,
     isLoading,
+    isFetching,
     error,
+    refetch,
   } = useGetWorkspaceProjectDetailQuery(
     {
       workspace_slug: params?.slug,
@@ -29,57 +30,76 @@ const ProjectDetail = () => {
     }
   )
 
- 
-
-
-
-  // ✅ Context update when data arrives
+  // ✅ set project in context
   useEffect(() => {
     if (project) {
-     
-      console.log(project)
       setSelectedProject(project)
-    
     }
-  }, [project,setSelectedProject])
+  }, [project, setSelectedProject])
 
-  
+  // 🔄 FIRST LOAD
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-3">
+        <div className="w-8 h-8 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+        <p className="text-sm text-gray-500">Loading project...</p>
+      </div>
+    )
+  }
 
-  // ✅ View switch
+  // ❌ ERROR
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4 text-center">
+        <p className="text-lg font-medium text-red-500">
+          Failed to load project
+        </p>
+
+        <p className="text-sm text-gray-500">
+          Something went wrong. Please try again.
+        </p>
+
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 bg-black text-white rounded-lg hover:opacity-80 transition"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+
+  // ✅ VIEW SWITCH
   const renderView = () => {
-    switch (selectedItem) {
+    const current = projectTab || 'project-tasks'
+
+    switch (current) {
       case 'project-tasks':
-        return <ProjectTasks  />
+        return <ProjectTasks />
+
       case 'project-members':
         return <ProjectMembers project={project} />
+
       case 'project-settings':
-        return <ProjectSettings  />
+        return <ProjectSettings />
+
       default:
         return null
     }
   }
 
-  // ✅ Loading state
-  if (isLoading) {
-    return <div className="p-4">Loading project...</div>
-  }
-
-  // ✅ Error state
-  if (error) {
-    return <div className="p-4 text-red-500">Failed to load project</div>
-  }
-
   return (
-  
-     <div>
-      {/* ✅ Dynamic title */}
-      <WorkspaceTopbar type="project"  />
+    <div >
+      {/* 🔝 TOPBAR */}
+      <WorkspaceTopbar type="project" />
 
-      <div>
+    
+
+      {/* 📦 CONTENT */}
+      <div className="mt-3">
         {renderView()}
       </div>
     </div>
- 
   )
 }
 

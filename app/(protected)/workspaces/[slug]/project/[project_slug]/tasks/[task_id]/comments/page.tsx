@@ -1,68 +1,18 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   useGetTaskCommentsQuery,
   useGetTaskQuery,
   useAddCommentMutation,
 } from '@/store/services/workspaceApi'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import CommentCard from '@/components/features/tasks/CommentCard'
 import CommentModal from '@/components/features/tasks/AddCommentModel'
-import { useSocket } from '@/context/SocketContext'
-import { useAppSelector } from '@/hooks/hooks'
-
-/* ================= TYPES ================= */
-
-export interface User {
-  id: number
-  username: string
-  email: string
-  first_name: string
-  last_name: string
-  date_joined: string
-}
-
-export interface Comment {
-  id: number
-  content: string
-  created_at: string
-  author: User
-  parent_comment: number | null
-  replies: Comment[]
-  likes: number
-  dislikes: number
-  user_reaction: 'like' | 'dislike' | null
-}
-
-export interface PaginatedComments {
-  count: number
-  next: string | null
-  previous: string | null
-  results: Comment[]
-}
-
-type CommentEvent = {
-  id: number
-  content: string
-  author: string
-  author_id: number
-  parent_comment: number | null
-}
-
-/* ================= COMPONENT ================= */
 
 const Page = () => {
   const params = useParams()
-  const socket = useSocket()
-  const user = useAppSelector((state) => state.auth.user)
-
-  const [parentId, setParentId] = useState<number | null>(null)
-  const [isOpen, setIsOpen] = useState(false)
-
-  // ✅ pagination state
-  const [page, setPage] = useState(1)
-  const [allComments, setAllComments] = useState<Comment[]>([])
+  const router = useRouter()
 
   const { slug, project_slug, task_id } = params as {
     slug: string
@@ -70,194 +20,146 @@ const Page = () => {
     task_id: string
   }
 
-  const { data: task, isLoading } = useGetTaskQuery({
+  const [isOpen, setIsOpen] = useState(false)
+  const [parentId, setParentId] = useState<number | null>(null)
+
+  const { data: task, isLoading: taskLoading } = useGetTaskQuery({
     workspace_slug: slug,
     project_slug,
     task_id,
   })
 
-  const { data, isFetching } = useGetTaskCommentsQuery({
+  const {
+    data,
+    isLoading: commentsLoading,
+    error,
+  } = useGetTaskCommentsQuery({
     workspace_slug: slug,
     project_slug,
     task_id,
-    page,
-  }) as { data?: PaginatedComments; isFetching: boolean }
+    page: 1,
+  })
 
   const [addComment, { isLoading: isSubmitting }] =
     useAddCommentMutation()
 
-
-  useEffect(() => {
-  if (!data?.results) return
- // eslint-disable-next-line react-hooks/set-state-in-effect
-  setAllComments((prev) => {
-    // ✅ first page → replace
-    if (page === 1) {
-      // avoid unnecessary re-render
-      const isSame =
-        prev.length === data.results.length &&
-        prev.every((p, i) => p.id === data.results[i]?.id)
-
-      if (isSame) return prev
-      return data.results
-    }
-
-    // ✅ next pages → merge
-    const newItems = data.results.filter(
-      (c) => !prev.some((p) => p.id === c.id)
-    )
-
-    if (newItems.length === 0) return prev
-
-    return [...prev, ...newItems]
-  })
-}, [data, page,task_id])
-
-
-  useEffect(() => {
-    if (!socket) return
-
-    const handler = (e: MessageEvent) => {
-      const parsed = JSON.parse(e.data)
-
-      if (parsed.event === 'comment_created') {
-        if (parsed.author_id === user?.id) return
-
-        const newComment: Comment = {
-          id: parsed.id,
-          content: parsed.content,
-          created_at: new Date().toISOString(),
-          author: {
-            id: parsed.author_id,
-            username: '',
-            email: '',
-            first_name: parsed.author,
-            last_name: '',
-            date_joined: '',
-          },
-          parent_comment: parsed.parent_comment,
-          replies: [],
-          likes: 0,
-          dislikes: 0,
-          user_reaction: null,
-        }
-
-        setAllComments((prev) => {
-          const exists = prev.some((c) => c.id === newComment.id)
-          if (exists) return prev
-
-         
-          if (newComment.parent_comment) {
-            return prev.map((c) =>
-              c.id === newComment.parent_comment
-                ? { ...c, replies: [...c.replies, newComment] }
-                : c
-            )
-          }
-          return [newComment, ...prev]
-        })
-      }
-    }
-
-    socket.addEventListener('message', handler)
-
-    return () => {
-      socket.removeEventListener('message', handler)
-    }
-  }, [socket, user])
-
-
-
   const handleSubmit = async (formData: { content: string }) => {
-    try {
-      await addComment({
-        workspace_slug: slug,
-        project_slug,
-        task_id,
-        content: formData.content,
-        parent_comment: parentId,
-      }).unwrap()
+    await addComment({
+      workspace_slug: slug,
+      project_slug,
+      task_id,
+      content: formData.content,
+      parent_comment: parentId,
+    })
 
-      setIsOpen(false)
-      setParentId(null)
-    } catch (err) {
-      console.error('Error adding comment:', err)
-    }
+    setIsOpen(false)
+    setParentId(null)
   }
 
-  const handleLoadMore = () => {
-    if (data?.next) {
-      setPage((prev) => prev + 1)
-    }
+  const comments = data?.results || []
+
+  /* 🔄 LOADING */
+  if (taskLoading || commentsLoading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-8 h-8 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+      </div>
+    )
   }
 
-
-  if (isLoading) {
-    return <div className="p-6">Loading...</div>
+  /* ❌ ERROR */
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh] gap-3 text-center">
+        <p className="text-red-500 text-sm font-medium">
+          Failed to load comments
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-3 py-2 bg-black text-white rounded text-xs"
+        >
+          Retry
+        </button>
+      </div>
+    )
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          {task?.title}
-        </h1>
+    <div className=" ">
 
-        <p className="text-gray-600 text-sm mb-4">
-          {task?.description}
-        </p>
-
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <span>Status: {task?.status}</span>
-          <span>Due: {task?.due_date}</span>
+      {/* 🔝 HEADER */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-lg font-semibold">Comments</h1>
+          <p className="text-xs text-gray-500">
+            {task?.title}
+          </p>
         </div>
+
+        <button
+          onClick={() => router.back()}
+          className="text-xs text-gray-500 hover:underline"
+        >
+          Back
+        </button>
       </div>
 
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
-            💬 Comments ({data?.count || 0})
+      {/* 📭 EMPTY STATE */}
+      {comments.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-[60vh] text-center gap-4">
+          
+          <div className="p-3 rounded-full bg-gray-100">
+            💬
+          </div>
+
+          <h2 className="text-sm font-semibold">
+            No comments yet
           </h2>
 
-          <button
-            onClick={() => {
-              setParentId(null)
-              setIsOpen(true)
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
-          >
-            + Add Comment
-          </button>
-        </div>
-
-        {allComments.length === 0 && (
-          <p className="text-gray-500 text-sm">
-            No comments yet...
+          <p className="text-xs text-gray-500 max-w-xs">
+            Start the discussion by adding your first comment.
           </p>
-        )}
 
-        {allComments.map((comment) => (
-          <CommentCard
-            key={comment.id}
-            comment={comment}
-            onReply={(id: number) => {
-              setParentId(id)
-              setIsOpen(true)
-            }}
-          />
-        ))}
-
-        {data?.next && (
           <button
-            onClick={handleLoadMore}
-            disabled={isFetching}
-            className="mt-4 w-full bg-gray-100 py-2 rounded-lg hover:bg-gray-200"
+            onClick={() => setIsOpen(true)}
+            className="bg-primary_blue text-white px-4 py-2 rounded-lg text-sm"
           >
-            {isFetching ? 'Loading...' : 'Load More'}
+            Add Comment
           </button>
-        )}
-      </div>
 
+        </div>
+      ) : (
+        <>
+          {/* ➕ ADD BUTTON (ONLY WHEN COMMENTS EXIST) */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={() => {
+                setParentId(null)
+                setIsOpen(true)
+              }}
+              className="bg-primary_blue text-white px-4 py-2 rounded-lg text-xs"
+            >
+              + Add Comment
+            </button>
+          </div>
+
+          {/* 💬 COMMENTS LIST */}
+          <div className="space-y-4">
+            {comments.map((comment: any) => (
+              <CommentCard
+                key={comment.id}
+                comment={comment}
+                onReply={(id: number) => {
+                  setParentId(id)
+                  setIsOpen(true)
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* 🧾 MODAL */}
       <CommentModal
         isOpen={isOpen}
         onClose={() => {

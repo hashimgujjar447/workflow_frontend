@@ -8,10 +8,13 @@ import WorkspaceSettings from './WorkspaceSettings'
 
 
 const WorkspaceInfo = ({data }:any) => {
-  const { selectedItem } = useWorkspace()
+  const { workspaceTab} = useWorkspace()
 
   const renderView = () => {
-    switch (selectedItem) {
+
+    const current=workspaceTab || 'workspace-projects'
+  
+    switch (current) {
       case 'workspace-projects':
         return <WorkspaceProjects />
 

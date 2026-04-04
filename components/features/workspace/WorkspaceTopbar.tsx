@@ -10,68 +10,56 @@ interface IWorkspaceTopBar {
 }
 
 const WorkspaceTopbar = ({ type = 'workspace' }: IWorkspaceTopBar) => {
-  const { selectedItem, setSelectedItem } = useWorkspace()
+  const {
+    projectTab,
+    setProjectTab,
+    workspaceTab,
+    setWorkspaceTab,
+  } = useWorkspace()
 
-  // ✅ UNIQUE + STABLE IDS
+  // ✅ decide active state based on type
+  const selectedItem = type === 'workspace' ? workspaceTab : projectTab
+  const setSelectedItem =
+    type === 'workspace' ? setWorkspaceTab : setProjectTab
+
+  // ✅ menu lists
   const workspaceList = [
-    {
-      id: 'workspace-projects',
-      title: 'Projects',
-      icon: <Clipboard className="w-4 h-4 text-text-secondary" />,
-    },
-    {
-      id: 'workspace-members',
-      title: 'Members',
-      icon: <UserRound className="w-4 h-4 text-text-secondary" />,
-    },
-    {
-      id: 'workspace-settings',
-      title: 'Settings',
-      icon: <Settings className="w-4 h-4 text-text-secondary" />,
-    },
+    { id: 'workspace-projects', title: 'Projects', icon: <Clipboard className="w-4 h-4" /> },
+    { id: 'workspace-members', title: 'Members', icon: <UserRound className="w-4 h-4" /> },
+    { id: 'workspace-settings', title: 'Settings', icon: <Settings className="w-4 h-4" /> },
   ]
 
   const projectList = [
-    {
-      id: 'project-tasks',
-      title: 'Tasks',
-      icon: <Clipboard className="w-4 h-4 text-text-secondary" />,
-    },
-    {
-      id: 'project-members',
-      title: 'Members',
-      icon: <UserRound className="w-4 h-4 text-text-secondary" />,
-    },
-    {
-      id: 'project-settings',
-      title: 'Settings',
-      icon: <Settings className="w-4 h-4 text-text-secondary" />,
-    },
+    { id: 'project-tasks', title: 'Tasks', icon: <Clipboard className="w-4 h-4" /> },
+    { id: 'project-members', title: 'Members', icon: <UserRound className="w-4 h-4" /> },
+    { id: 'project-settings', title: 'Settings', icon: <Settings className="w-4 h-4" /> },
   ]
 
   const itemsList = type === 'workspace' ? workspaceList : projectList
 
-  // ✅ DEFAULT SELECTED (BASED ON TYPE)
+  // ✅ default tab set (IMPORTANT FIX)
   useEffect(() => {
-    if (type === 'project') {
-      setSelectedItem?.('project-tasks')
-    } else {
-      setSelectedItem?.('workspace-projects')
+    if (type === 'workspace' && !workspaceTab) {
+      setWorkspaceTab('workspace-projects')
     }
-  }, [type, setSelectedItem])
+
+    if (type === 'project' && !projectTab) {
+      setProjectTab('project-tasks')
+    }
+  }, [type, workspaceTab, projectTab])
 
   return (
-    <div className="bg-cards border py-1 px-3 border-custom_border w-full h-10 justify-between flex items-center">
+    <div className="bg-cards border py-1 px-3 border-custom_border w-full h-10 flex justify-between items-center">
       
       {/* LEFT MENU */}
       <div className="flex items-center gap-x-5">
         {itemsList.map((item) => (
           <div
-            key={item.id} // ✅ IMPORTANT (React optimization)
-            onClick={() => setSelectedItem?.(item.id)}
-            className={`flex relative items-center gap-x-1 ${
+            key={item.id}
+            onClick={() => setSelectedItem(item.id)}
+            className={`flex items-center gap-x-1 text-sm relative cursor-pointer ${
               selectedItem === item.id ? 'selected_item_after' : ''
-            } text-sm hover:cursor-pointer text-text-secondary`}
+            }`}
           >
             {item.icon}
             <h2>{item.title}</h2>
@@ -80,7 +68,7 @@ const WorkspaceTopbar = ({ type = 'workspace' }: IWorkspaceTopBar) => {
       </div>
 
       {/* RIGHT BUTTON */}
-      <Button className="bg-transparent text-text-secondary hover:bg-transparent cursor-pointer">
+      <Button className="bg-transparent hover:bg-transparent">
         <Ellipsis className="h-4 w-4" />
       </Button>
     </div>

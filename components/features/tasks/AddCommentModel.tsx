@@ -20,7 +20,7 @@ const CommentModal = ({ isOpen, onClose, onSubmit,isSubmitting, parentId = null 
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-lg">
+      <div className="bg-white w-65 sm:w-full  sm:max-w-md rounded-2xl p-6 shadow-lg">
         
         <h2 className="text-lg font-semibold mb-4">
           {parentId ? 'Reply' : 'Add Comment'}

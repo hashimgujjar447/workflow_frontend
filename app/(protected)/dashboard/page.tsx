@@ -26,11 +26,14 @@ const Home = () => {
 
   // Prevent hydration mismatch
   if (workspacesLoading || tasksLoading) {
-    return <div className="p-4 px-7">Loading...</div>;
+    return (  <div className="flex flex-col items-center justify-center h-[60vh] gap-3">
+      <div className="w-8 h-8 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+      <p className="text-sm text-gray-500">Loading your dashboard...</p>
+    </div>)
   }
 
   return (
-    <div className="p-4 px-7">
+    <div className="p-4 px-3 sm:px-7">
       <TopBar />
 
       {/* WORKSPACES */}
@@ -46,13 +49,30 @@ const Home = () => {
         </div>
       </div>
 
-      {/* TASKS */}
-      <div className="mt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          <DashboardAllTasks tasks={tasksData?.recent_tasks || []} />
-          <DashboardYourAssign tasks={tasksData?.my_tasks || []} />
-        </div>
+     
+<div className="mt-8">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+    
+    {/* ALL TASKS */}
+    {tasksData?.recent_tasks?.length ? (
+      <DashboardAllTasks tasks={tasksData.recent_tasks} />
+    ) : (
+      <div className="p-4 border rounded-lg text-center text-gray-500">
+        No tasks available
       </div>
+    )}
+
+    {/* MY TASKS */}
+    {tasksData?.my_tasks?.length ? (
+      <DashboardYourAssign tasks={tasksData.my_tasks} />
+    ) : (
+      <div className="p-4 border rounded-lg text-center text-gray-500">
+        No assigned tasks
+      </div>
+    )}
+
+  </div>
+</div>
     </div>
   );
 };

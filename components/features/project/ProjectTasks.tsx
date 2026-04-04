@@ -13,8 +13,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { useAppDispatch } from '@/hooks/hooks'
 import { useSocket } from '@/context/SocketContext'
 
-/* ================= TYPES ================= */
-
 type TaskStatus = 'todo' | 'in_progress' | 'failed' | 'completed'
 
 interface ITask {
@@ -23,7 +21,6 @@ interface ITask {
   description?: string
   status: TaskStatus
   due_date?: string
-  created_at?: string
 }
 
 interface IGroupedTasks {
@@ -33,13 +30,14 @@ interface IGroupedTasks {
   completed: ITask[]
 }
 
-/* ================= COMPONENT ================= */
-
 const ProjectTasks = () => {
   const params = useParams()
   const router = useRouter()
   const dispatch = useAppDispatch()
   const socket = useSocket()
+
+  const workspace_slug = params?.slug as string
+  const project_slug = params?.project_slug as string
 
   const [openAddTaskMenu, setOpenAddTaskMenu] = useState(false)
   const [assignedUser, setAssignedUser] = useState<string>('')
@@ -47,9 +45,6 @@ const ProjectTasks = () => {
   const [description, setDescription] = useState('')
   const [status, setStatus] = useState<TaskStatus>('todo')
   const [dueDate, setDueDate] = useState('')
-
-  const workspace_slug = params?.slug as string
-  const project_slug = params?.project_slug as string
 
   const [addNewTask, { isLoading: isCreating }] = useAddNewTaskMutation()
 
@@ -71,8 +66,7 @@ const ProjectTasks = () => {
     completed: [],
   }
 
-  /* ================= SOCKET ================= */
-
+  /* SOCKET */
   useEffect(() => {
     if (!socket) return
 
@@ -107,56 +101,11 @@ const ProjectTasks = () => {
           )
         )
       }
-
-      if (data.event === 'task_updated') {
-        dispatch(
-          workspaceApi.util.updateQueryData(
-            'getProjectTasks',
-            { workspace_slug, project_slug },
-            (draft: IGroupedTasks) => {
-              const lists = [
-                draft.todo,
-                draft.inprogress,
-                draft.completed,
-                draft.failed,
-              ]
-
-              let taskToMove: ITask | null = null
-
-              // remove from old list
-              for (const list of lists) {
-                const index = list.findIndex((t) => t.id === data.id)
-                if (index !== -1) {
-                  taskToMove = list[index]
-                  list.splice(index, 1)
-                  break
-                }
-              }
-
-              if (!taskToMove) return
-
-              taskToMove.status = data.status as TaskStatus
-
-              if (data.status === 'todo') draft.todo.unshift(taskToMove)
-              if (data.status === 'in_progress')
-                draft.inprogress.unshift(taskToMove)
-              if (data.status === 'completed')
-                draft.completed.unshift(taskToMove)
-              if (data.status === 'failed') draft.failed.unshift(taskToMove)
-            }
-          )
-        )
-      }
     }
 
     socket.addEventListener('message', handler)
-
-    return () => {
-      socket.removeEventListener('message', handler)
-    }
-  }, [socket, project_slug, workspace_slug, dispatch])
-
-  /* ================= HANDLERS ================= */
+    return () => socket.removeEventListener('message', handler)
+  }, [socket, workspace_slug, project_slug, dispatch])
 
   const handleAddNewTask = async () => {
     try {
@@ -174,24 +123,43 @@ const ProjectTasks = () => {
       setTitle('')
       setDescription('')
       setAssignedUser('')
+      setDueDate('')
     } catch (err) {
       console.log(err)
     }
   }
 
-  /* ================= UI ================= */
-
+  /* LOADING */
   if (isTasksLoading) {
-    return <div className="mt-5 text-sm">Loading tasks...</div>
-  }
-
-  if (error) {
     return (
-      <div className="mt-5 text-red-500 text-sm">
-        Failed to load tasks
+      <div className="flex items-center justify-center h-[40vh]">
+        <div className="w-6 h-6 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
       </div>
     )
   }
+
+  /* ERROR */
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[40vh] gap-3 text-center">
+        <p className="text-red-500 text-sm font-medium">
+          Failed to load tasks
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-3 py-1 bg-black text-white rounded text-xs"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+
+  const isEmpty =
+    !tasksData.todo.length &&
+    !tasksData.inprogress.length &&
+    !tasksData.failed.length &&
+    !tasksData.completed.length
 
   const columns = [
     { id: 'todo', title: 'To Do', color: 'bg-todo', tasks: tasksData.todo },
@@ -224,42 +192,121 @@ const ProjectTasks = () => {
         </Button>
       </div>
 
-      <div className="flex gap-5 overflow-x-auto pb-2">
-        {columns.map((col) => (
-          <div key={col.id} className="min-w-[280px] bg-gray-50 border rounded-xl p-3">
-            <div className={`flex justify-between text-white px-2 py-2 rounded ${col.color}`}>
-              <h2 className="text-sm font-semibold">
-                {col.title} ({col.tasks.length})
-              </h2>
-            </div>
+      {/* EMPTY STATE */}
+      {isEmpty ? (
+  <div className="flex items-center justify-center h-[50vh]">
+    <div className="flex flex-col items-center text-center gap-3 bg-cards border border-custom_border rounded-xl p-8 shadow-sm">
+      
+      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
+        <Plus className="w-5 h-5 text-gray-400" />
+      </div>
 
-            <div className="mt-3 space-y-3 max-h-60 overflow-y-auto pr-1">
-              {col.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  onClick={() =>
-                    router.push(
-                      `/workspaces/${workspace_slug}/project/${project_slug}/tasks/${task.id}`
-                    )
-                  }
-                  className="bg-white p-3 rounded-lg border cursor-pointer"
-                >
-                  <h3 className="text-sm font-medium">{task.title}</h3>
+      <h2 className="text-sm font-semibold">
+        No tasks available
+      </h2>
 
-                  <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
-                    <Calendar size={12} />
-                    <span>
-                      {task.due_date
-                        ? new Date(task.due_date).toLocaleDateString()
-                        : 'No date'}
-                    </span>
+      <p className="text-xs text-gray-500 max-w-xs">
+        You haven’t created any tasks yet.  
+        Click the <span className="font-medium text-black">“Add Task”</span> button above to get started.
+      </p>
+
+    </div>
+  </div>
+)  : (
+        <div className="flex gap-5 overflow-x-auto pb-2">
+          {columns.map((col) => (
+            <div key={col.id} className="min-w-[280px] bg-gray-50 border rounded-xl p-3">
+              <div className={`flex justify-between text-white px-2 py-2 rounded ${col.color}`}>
+                <h2 className="text-sm font-semibold">
+                  {col.title} ({col.tasks.length})
+                </h2>
+              </div>
+
+              <div className="mt-3 space-y-3 max-h-60 overflow-y-auto">
+                {col.tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    onClick={() =>
+                      router.push(
+                        `/workspaces/${workspace_slug}/project/${project_slug}/tasks/${task.id}`
+                      )
+                    }
+                    className="bg-white p-3 rounded-lg border cursor-pointer"
+                  >
+                    <h3 className="text-sm font-medium">{task.title}</h3>
+
+                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
+                      <Calendar size={12} />
+                      <span>
+                        {task.due_date
+                          ? new Date(task.due_date).toLocaleDateString()
+                          : 'No date'}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* MODAL */}
+      {openAddTaskMenu && (
+        <div className="fixed inset-0 bg-black/40  flex items-center justify-center z-[9999]">
+          <div className="bg-white p-6 rounded-xl w-[400px]">
+            <h2 className="text-sm font-semibold mb-3">Create Task</h2>
+
+            <input
+              placeholder="Title"
+              className="border w-full p-2 rounded mb-2"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <textarea
+              placeholder="Description"
+              className="border w-full p-2 rounded mb-2"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+
+            <input
+              type="date"
+              className="border w-full p-2 rounded mb-2"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+
+            <select
+              className="border w-full p-2 rounded mb-4"
+              value={assignedUser}
+              onChange={(e) => setAssignedUser(e.target.value)}
+            >
+              <option value="">Assign user</option>
+              {members?.map((m: any) => (
+                <option key={m.id} value={m.id}>
+                  {m.member_detail.username}
+                </option>
               ))}
+            </select>
+
+            <div className="flex justify-end gap-2">
+              <Button onClick={() => setOpenAddTaskMenu(false)}>
+                Cancel
+              </Button>
+
+              <Button
+                onClick={handleAddNewTask}
+                disabled={isCreating}
+                className="bg-primary_blue text-white"
+              >
+                {isCreating ? 'Creating...' : 'Create'}
+              </Button>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

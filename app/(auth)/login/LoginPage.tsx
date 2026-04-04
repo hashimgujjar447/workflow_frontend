@@ -24,7 +24,7 @@ const redirectParam = redirect ? encodeURIComponent(redirect) : ''
     try {
       const res = await login({ email, password }).unwrap();
 
-    
+     console.log("Login responce ",res)
     
       dispatch(
         setCredentials({

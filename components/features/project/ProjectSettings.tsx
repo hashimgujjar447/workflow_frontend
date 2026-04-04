@@ -6,7 +6,6 @@ import {
   useDeleteProjectMutation,
 } from '@/store/services/workspaceApi'
 
-
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { usePermission } from '@/hooks/usePermissions'
 
@@ -17,11 +16,10 @@ const ProjectSettings = () => {
   const workspaceSlug = params?.slug
   const projectSlug = params?.project_slug
 
-  // 🧠 selectedProject from store
-  const {selectedProject} = useWorkspace()
-  
+  const { selectedProject } = useWorkspace()
 
   const [name, setName] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
 
   const [updateProject, { isLoading: isUpdating }] =
     useUpdateProjectMutation()
@@ -29,35 +27,42 @@ const ProjectSettings = () => {
   const [deleteProject, { isLoading: isDeleting }] =
     useDeleteProjectMutation()
 
-    const{isLoading:permissionLoading,canDeleteProject,canUpdateProject}=usePermission(workspaceSlug,projectSlug)
+  const {
+    isLoading: permissionLoading,
+    canDeleteProject,
+    canUpdateProject,
+  } = usePermission(workspaceSlug, projectSlug)
 
-  // set initial name
   useEffect(() => {
     if (selectedProject) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(selectedProject?.name)
     }
   }, [selectedProject])
 
-  // ✏️ Update handler
+  /* 🔄 LOADING */
+  if (!selectedProject || permissionLoading) {
+    return (
+      <div className="flex items-center justify-center h-[50vh]">
+        <div className="w-6 h-6 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+
+  /* ✏️ UPDATE */
   const handleUpdate = async () => {
+    setErrorMsg('')
     try {
       await updateProject({
         workspace_slug: workspaceSlug,
         project_slug: projectSlug,
-        data: {
-          name,
-        },
+        data: { name },
       }).unwrap()
-
-      alert('Project updated successfully ✅')
-    } catch (err) {
-      console.error(err)
-      alert('Update failed ❌')
+    } catch (err: any) {
+      setErrorMsg('Failed to update project')
     }
   }
 
-  // 🗑️ Delete handler
+  /* 🗑 DELETE */
   const handleDelete = async () => {
     const confirmDelete = confirm(
       'Are you sure you want to delete this project?'
@@ -70,68 +75,76 @@ const ProjectSettings = () => {
         project_slug: projectSlug,
       }).unwrap()
 
-      alert('Project deleted 🗑️')
-
-      // redirect after delete
-      router.push(`/workspace/${workspaceSlug}`)
+      router.push(`/workspaces/${workspaceSlug}`)
     } catch (err) {
-      console.error(err)
-      alert('Delete failed ❌')
+      setErrorMsg('Failed to delete project')
     }
   }
 
-  if (!selectedProject || permissionLoading) return <div>Loading project...</div>
-
   return (
     <div className="max-w-xl space-y-6">
+
+      {/* 🔝 HEADER */}
       <h2 className="text-xl font-semibold">Project Settings</h2>
 
-      {/* 📌 Project Info */}
-      <div className="p-4 border rounded-lg">
-        <p className="text-sm text-gray-500">Project Slug</p>
+      {/* ❌ ERROR */}
+      {errorMsg && (
+        <div className="p-3 bg-red-50 text-red-600 text-sm rounded">
+          {errorMsg}
+        </div>
+      )}
+
+      {/* 📦 PROJECT INFO */}
+      <div className="p-5 border rounded-xl bg-white shadow-sm">
+        <p className="text-xs text-gray-400">Project Slug</p>
         <p className="font-medium">{selectedProject.slug}</p>
 
-        <p className="text-sm text-gray-500 mt-2">Total Members</p>
-        <p>{selectedProject?.total_members}</p>
+        <p className="text-xs text-gray-400 mt-3">Total Members</p>
+        <p className="font-medium">{selectedProject?.total_members}</p>
       </div>
- {canUpdateProject && (
-  
-      
-      <div className="p-4 border rounded-lg space-y-3">
-        <h3 className="font-medium">Edit Project Name</h3>
 
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border px-3 py-2 rounded"
-        />
-        <button
-          onClick={handleUpdate}
-          disabled={isUpdating}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          {isUpdating ? 'Updating...' : 'Update'}
-        </button>
+      {/* ✏️ EDIT */}
+      {canUpdateProject && (
+        <div className="p-5 border rounded-xl bg-white shadow-sm space-y-3">
+          <h3 className="font-medium text-sm">Edit Project Name</h3>
 
-       
-      </div>
- )}
-      
-     {canDeleteProject && ( 
-       <div className="p-4 border rounded-lg">
-        <h3 className="font-medium text-red-600">Danger Zone</h3>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full border px-3 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+          />
 
-        <button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="mt-2 px-4 py-2 bg-red-500 text-white rounded"
-        >
-          {isDeleting ? 'Deleting...' : 'Delete Project'}
-        </button>
-      </div>
-     
-    )}
+          <div className="flex justify-end">
+            <button
+              onClick={handleUpdate}
+              disabled={isUpdating}
+              className="px-4 py-2 bg-primary_blue text-white rounded-lg text-sm"
+            >
+              {isUpdating ? 'Updating...' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ⚠️ DANGER ZONE */}
+      {canDeleteProject && (
+        <div className="p-5 border border-red-200 rounded-xl bg-red-50 space-y-3">
+          <h3 className="font-medium text-red-600">Danger Zone</h3>
+
+          <p className="text-xs text-red-500">
+            Deleting this project will remove all related data permanently.
+          </p>
+
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm"
+          >
+            {isDeleting ? 'Deleting...' : 'Delete Project'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

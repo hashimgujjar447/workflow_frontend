@@ -13,7 +13,7 @@ export default function ProtectedRoute({
 }) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
-  const pathname = usePathname(); // ✅ current path
+  const pathname = usePathname(); 
 
   const isInitialized = useSelector(
     (state: RootState) => state.auth.isInitialized
@@ -21,13 +21,18 @@ export default function ProtectedRoute({
 
   useEffect(() => {
     if (!isAuthenticated && isInitialized) {
-      // 🔥 redirect with return path
+
       router.push(`/login?redirect=${pathname}`);
     }
   }, [isAuthenticated, isInitialized, router, pathname]);
 
   if (!isInitialized) {
-    return <p>Checking auth...</p>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-3">
+  <div className="w-6 h-6 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+  <p className="text-sm text-gray-500">Loading .... </p>
+</div>
+    )
   }
 
   if (!isAuthenticated) {

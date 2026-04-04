@@ -5,7 +5,7 @@ export const api = createApi({
   reducerPath: "api",
 
   baseQuery:baseQueryWithReauth,
-    tagTypes: ['Workspaces','ProjectMembers','Tasks','TaskComments','Projects','WorkspaceMembers'],
+  tagTypes: ['Workspaces','ProjectMembers','Tasks','TaskComments','Projects','WorkspaceMembers','TaskDetail'],
 
   endpoints: () => ({}),
 });

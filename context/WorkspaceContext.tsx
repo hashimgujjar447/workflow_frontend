@@ -10,10 +10,13 @@ interface IProject {
   total_members?:number
 }
 interface IWorkspaceContext {
-  selectedItem: string
-  setSelectedItem: React.Dispatch<React.SetStateAction<string>>
+  workspaceTab: string
+    projectTab: string
+  setWorkspaceTab:React.Dispatch<React.SetStateAction<string>>
+  setProjectTab:React.Dispatch<React.SetStateAction<string>>
   selectedProject:IProject | null
   setSelectedProject:React.Dispatch<React.SetStateAction<IProject|null>>
+
   
   
 
@@ -22,12 +25,13 @@ interface IWorkspaceContext {
 const WorkspaceContext = createContext<IWorkspaceContext | null>(null)
 
 export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedItem, setSelectedItem] = useState('Projects')
+  const [workspaceTab, setWorkspaceTab] = useState<string>('workspace-projects')
+const [projectTab, setProjectTab] = useState<string>('project-tasks')
   const [selectedProject, setSelectedProject] = useState<IProject | null>(null)
 
 
   return (
-    <WorkspaceContext.Provider value={{ selectedItem, setSelectedItem,selectedProject,setSelectedProject }}>
+    <WorkspaceContext.Provider value={{ workspaceTab,projectTab,setProjectTab, setWorkspaceTab,selectedProject,setSelectedProject }}>
       {children}
     </WorkspaceContext.Provider>
   )

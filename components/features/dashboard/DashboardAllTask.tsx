@@ -6,6 +6,7 @@ const DashboardAllTasks = ({tasks}:any) => {
     pending: "bg-yellow-100 text-yellow-700",
     completed: "bg-green-100 text-green-700",
     todo: "bg-gray-200 text-gray-600",
+    in_progress: 'bg-blue-100 text-blue-700',
   };
 
   return (
