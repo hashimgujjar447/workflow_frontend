@@ -6,12 +6,13 @@ export const useProjectRole = (workspace_slug, project_slug) => {
 
   const { data, isLoading } = useGetProjectMembersQuery(
     { workspace_slug, project_slug },
-    { skip: !project_slug }
+    {
+      skip: !project_slug || !user?.id, // ✅ important fix
+    }
   );
 
- 
   const currentUser = data?.find(
-    (member) => member?.member_detail?.id === user?.id
+    (member) => member?.member_detail?.id === user?.id // ✅ safe access
   );
 
   return {

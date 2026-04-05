@@ -1,5 +1,3 @@
-// permissions.js
-
 export const WORKSPACE_PERMISSIONS = {
   manager: [
     "create_project",
@@ -32,5 +30,7 @@ export const can = (role, action, scope = "workspace") => {
       ? PROJECT_PERMISSIONS
       : WORKSPACE_PERMISSIONS;
 
-  return permissionsMap[role]?.includes(action);
+  if (!role) return false; 
+
+  return permissionsMap[role]?.includes(action) || false;
 };
