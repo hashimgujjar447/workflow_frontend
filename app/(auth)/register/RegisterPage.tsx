@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation";
+import { useRegisterMutation } from "@/store/services/authApi";
 
 export default function RegisterPage() {
+  const router = useRouter()
+  const [register, { isLoading }] = useRegisterMutation()
+
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -12,6 +16,8 @@ export default function RegisterPage() {
     username: "",
     password: "",
   });
+
+  const [error, setError] = useState("")
 
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect')
@@ -23,30 +29,61 @@ export default function RegisterPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(form);
+    setError("")
+
+    try {
+      await register(form).unwrap()
+
+      // ✅ success → login page
+      router.push(
+        redirect
+          ? `/login?redirect=${encodeURIComponent(redirect)}`
+          : '/login'
+      )
+
+    } catch (err: any) {
+      console.log(err)
+
+      // 🔥 Better error handling
+      setError(
+        err?.data?.message ||
+        err?.data?.email?.[0] ||
+        err?.data?.username?.[0] ||
+        "Registration failed"
+      )
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-xl shadow-md w-full max-w-md"
+        className="bg-white p-6 rounded-2xl shadow-md w-full max-w-md space-y-3"
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
+        <h2 className="text-2xl font-bold text-center">Register</h2>
 
-        <input name="first_name" placeholder="First Name" className="w-full mb-2 p-2 border rounded" onChange={handleChange} />
-        <input name="last_name" placeholder="Last Name" className="w-full mb-2 p-2 border rounded" onChange={handleChange} />
-        <input name="username" placeholder="Username" className="w-full mb-2 p-2 border rounded" onChange={handleChange} />
-        <input type="email" name="email" placeholder="Email" className="w-full mb-2 p-2 border rounded" onChange={handleChange} />
-        <input type="password" name="password" placeholder="Password" className="w-full mb-4 p-2 border rounded" onChange={handleChange} />
+        {/* ❌ ERROR */}
+        {error && (
+          <p className="text-red-500 text-sm text-center">{error}</p>
+        )}
 
-        <button type="submit" className="w-full bg-black text-white py-2 rounded hover:opacity-90">
-          Register
+        <input name="first_name" placeholder="First Name" className="w-full p-2 border rounded" onChange={handleChange} />
+        <input name="last_name" placeholder="Last Name" className="w-full p-2 border rounded" onChange={handleChange} />
+        <input name="username" placeholder="Username" className="w-full p-2 border rounded" onChange={handleChange} />
+        <input type="email" name="email" placeholder="Email" className="w-full p-2 border rounded" onChange={handleChange} />
+        <input type="password" name="password" placeholder="Password" className="w-full p-2 border rounded" onChange={handleChange} />
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-black text-white py-2 rounded hover:opacity-90 disabled:opacity-50"
+        >
+          {isLoading ? "Creating account..." : "Register"}
         </button>
 
-        <p className="text-sm mt-3 text-center">
+        <p className="text-sm text-center">
           Already have an account?{" "}
           <Link
             href={redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'}

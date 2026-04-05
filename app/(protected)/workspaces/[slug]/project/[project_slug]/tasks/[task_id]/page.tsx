@@ -4,11 +4,17 @@ import { useParams, useRouter } from 'next/navigation'
 import {
   useGetTaskQuery,
   useUpdateTaskStatusMutation,
+  workspaceApi,
 } from '@/store/services/workspaceApi'
 import { Calendar, MessageSquare } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
 import CommentCard from '@/components/features/tasks/CommentCard'
+
+/* ✅ SOCKET IMPORTS */
+import { useSocket } from '@/context/SocketContext'
+import { useEffect } from 'react'
+import { useAppDispatch } from '@/hooks/hooks'
 
 const statusColors: any = {
   todo: 'bg-gray-100 text-gray-700',
@@ -23,6 +29,10 @@ const TaskDetailPage = () => {
 
   const { user } = useSelector((state: RootState) => state.auth)
 
+  /* ✅ SOCKET INIT */
+  const socket = useSocket()
+  const dispatch = useAppDispatch()
+
   const { slug, project_slug, task_id } = params as any
 
   const { data: task, isLoading } = useGetTaskQuery({
@@ -32,6 +42,70 @@ const TaskDetailPage = () => {
   })
 
   const [updateStatus] = useUpdateTaskStatusMutation()
+
+  /* ================= SOCKET ================= */
+  useEffect(() => {
+    if (!socket) return
+
+    const handler = (e: MessageEvent) => {
+      const data = JSON.parse(e.data)
+
+      /* 🔄 TASK STATUS UPDATE */
+      if (data.event === 'task_updated') {
+        dispatch(
+          workspaceApi.util.updateQueryData(
+            'getTask',
+            { workspace_slug: slug, project_slug, task_id },
+            (draft: any) => {
+              if (!draft) return
+              draft.status = data.status
+            }
+          )
+        )
+      }
+
+      /* 💬 NEW COMMENT */
+      if (data.event === 'comment_created') {
+        dispatch(
+          workspaceApi.util.updateQueryData(
+            'getTask',
+            { workspace_slug: slug, project_slug, task_id },
+            (draft: any) => {
+              if (!draft) return
+
+              draft.comments = draft.comments || []
+
+              // ✅ duplicate check
+              const exists = draft.comments.some(
+                (c: any) => c.id === data.id
+              )
+              if (exists) return
+
+              const newComment = {
+                id: data.id,
+                content: data.content,
+                created_at: new Date().toISOString(),
+                author: {
+                  id: data.author_id,
+                  first_name: data.author,
+                },
+              }
+
+              draft.comments.unshift(newComment)
+            }
+          )
+        )
+      }
+    }
+
+    socket.addEventListener('message', handler)
+
+    return () => {
+      socket.removeEventListener('message', handler)
+    }
+  }, [socket, slug, project_slug, task_id, dispatch])
+
+  /* ================= UI ================= */
 
   if (isLoading) {
     return (
@@ -43,7 +117,6 @@ const TaskDetailPage = () => {
 
   if (!task) return <div>Task not found</div>
 
-  // 🔥 Due date logic
   const dueDate = task.due_date ? new Date(task.due_date) : null
   const today = new Date()
   const isOverdue = dueDate && dueDate < today
@@ -85,10 +158,9 @@ const TaskDetailPage = () => {
           </p>
         </div>
 
-        {/* 🔥 IMPROVED META SECTION */}
+        {/* META */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-          {/* 👤 ASSIGNED USER */}
           <div className="flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-xl">
             <div className="w-9 h-9 flex items-center justify-center rounded-full bg-primary_blue text-white text-sm font-semibold">
               {task.assigned_to?.member?.first_name?.charAt(0) || 'U'}
@@ -102,7 +174,6 @@ const TaskDetailPage = () => {
             </div>
           </div>
 
-          {/* ⏰ DUE DATE */}
           <div className="flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-xl">
             <Calendar size={16} className={isOverdue ? 'text-red-500' : ''} />
 
@@ -113,21 +184,14 @@ const TaskDetailPage = () => {
                   ? dueDate.toLocaleDateString()
                   : 'No deadline'}
               </p>
-
-           
             </div>
           </div>
 
         </div>
 
-        {/* CREATED INFO */}
         <div className="mt-6 text-xs text-gray-500 flex justify-between flex-wrap gap-2">
-          <span>
-            Created by: {task.created_by?.first_name}
-          </span>
-          <span>
-            Created: {new Date(task.created_at).toLocaleDateString()}
-          </span>
+          <span>Created by: {task.created_by?.first_name}</span>
+          <span>Created: {new Date(task.created_at).toLocaleDateString()}</span>
         </div>
       </div>
 

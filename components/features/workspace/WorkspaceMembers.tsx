@@ -29,6 +29,8 @@ const WorkspaceMembers = () => {
     canAddWorkspaceMembers,
   } = usePermission(slug)
 
+  
+
   const [inviteMember, { isLoading: inviteLoading }] =
     useInviteMemberMutation()
 
@@ -80,6 +82,8 @@ const WorkspaceMembers = () => {
       </div>
     )
   }
+
+  console.log(canAddWorkspaceMembers)
 
   return (
     <div className="mt-7 space-y-4">

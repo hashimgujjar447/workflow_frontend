@@ -89,7 +89,7 @@ const WorkspaceLayoutContent = ({
                 )}
               </>
             ) : (
-              <span>Dashboard</span>
+              <span>Workspace Page</span>
             )}
           </h1>
 

@@ -1,18 +1,25 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   useGetTaskCommentsQuery,
   useGetTaskQuery,
   useAddCommentMutation,
+  workspaceApi,
 } from '@/store/services/workspaceApi'
 import { useParams, useRouter } from 'next/navigation'
+import { useSocket } from '@/context/SocketContext'
+import { useAppDispatch, useAppSelector } from '@/hooks/hooks'
+
 import CommentCard from '@/components/features/tasks/CommentCard'
 import CommentModal from '@/components/features/tasks/AddCommentModel'
 
 const Page = () => {
   const params = useParams()
   const router = useRouter()
+  const socket = useSocket()
+  const dispatch = useAppDispatch()
+  const user = useAppSelector((state) => state.auth.user)
 
   const { slug, project_slug, task_id } = params as {
     slug: string
@@ -43,6 +50,82 @@ const Page = () => {
   const [addComment, { isLoading: isSubmitting }] =
     useAddCommentMutation()
 
+  /* ================= SOCKET ================= */
+  useEffect(() => {
+    if (!socket) return
+
+    const handler = (e: MessageEvent) => {
+      const parsed = JSON.parse(e.data)
+
+      if (parsed.event === 'comment_created') {
+        // ❌ apni hi comment ignore
+        if (parsed.author_id === user?.id) return
+
+        const newComment = {
+          id: parsed.id,
+          content: parsed.content,
+          created_at: new Date().toISOString(),
+          author: {
+            id: parsed.author_id,
+            username: '',
+            email: '',
+            first_name: parsed.author,
+            last_name: '',
+            date_joined: '',
+          },
+          parent_comment: parsed.parent_comment,
+          replies: [],
+          likes: 0,
+          dislikes: 0,
+          user_reaction: null,
+        }
+
+        dispatch(
+          workspaceApi.util.updateQueryData(
+            'getTaskComments',
+            {
+              workspace_slug: slug,
+              project_slug,
+              task_id,
+              page: 1, // must match query
+            },
+            (draft: any) => {
+              if (!draft?.results) return
+
+              // ✅ duplicate check
+              const exists = draft.results.some(
+                (c: any) => c.id === newComment.id
+              )
+              if (exists) return
+
+              // ✅ reply handling
+              if (newComment.parent_comment) {
+                const parent = draft.results.find(
+                  (c: any) => c.id === newComment.parent_comment
+                )
+                if (parent) {
+                  parent.replies = parent.replies || []
+                  parent.replies.push(newComment)
+                  return
+                }
+              }
+
+              // ✅ new comment
+              draft.results.unshift(newComment)
+            }
+          )
+        )
+      }
+    }
+
+    socket.addEventListener('message', handler)
+
+    return () => {
+      socket.removeEventListener('message', handler)
+    }
+  }, [socket, user, slug, project_slug, task_id, dispatch])
+
+  /* ================= SUBMIT ================= */
   const handleSubmit = async (formData: { content: string }) => {
     await addComment({
       workspace_slug: slug,
@@ -85,8 +168,7 @@ const Page = () => {
   }
 
   return (
-    <div className=" ">
-
+    <div>
       {/* 🔝 HEADER */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -107,7 +189,6 @@ const Page = () => {
       {/* 📭 EMPTY STATE */}
       {comments.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-[60vh] text-center gap-4">
-          
           <div className="p-3 rounded-full bg-gray-100">
             💬
           </div>
@@ -126,11 +207,10 @@ const Page = () => {
           >
             Add Comment
           </button>
-
         </div>
       ) : (
         <>
-          {/* ➕ ADD BUTTON (ONLY WHEN COMMENTS EXIST) */}
+          {/* ➕ ADD BUTTON */}
           <div className="flex justify-end mb-4">
             <button
               onClick={() => {

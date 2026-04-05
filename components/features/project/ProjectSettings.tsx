@@ -35,6 +35,7 @@ const ProjectSettings = () => {
 
   useEffect(() => {
     if (selectedProject) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(selectedProject?.name)
     }
   }, [selectedProject])
