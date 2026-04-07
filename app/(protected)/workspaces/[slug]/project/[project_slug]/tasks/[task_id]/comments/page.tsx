@@ -114,7 +114,7 @@ const Page = () => {
 
       if (
         parsed.event === 'comment_reaction_created' ||
-        parsed.event === 'comment_reaction_updated'
+        parsed.event === 'comment_reaction_updated' || parsed.event==='comment_reaction_deleted'
       ) {
         dispatch(
           workspaceApi.util.updateQueryData(
