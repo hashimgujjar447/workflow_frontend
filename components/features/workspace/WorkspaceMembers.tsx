@@ -9,6 +9,7 @@ import {
 import { IWorkspaceMember } from '@/types/workspace'
 import { Button } from '@/components/ui/Button'
 import { usePermission } from '@/hooks/usePermissions'
+import toast from 'react-hot-toast'
 
 const WorkspaceMembers = () => {
   const params = useParams()
@@ -51,6 +52,7 @@ const WorkspaceMembers = () => {
 
       setIsOpen(false)
       setEmail('')
+      toast.success("Invite send successfully")
     } catch (err: any) {
       setErrorMsg(err?.data?.error || 'Failed to send invite')
     }

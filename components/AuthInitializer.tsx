@@ -25,9 +25,7 @@ export default function AuthInitializer() {
         const data = await refreshRes.json();
         const access = data.access;
 
-        // ❌ REMOVE THIS
-        // localStorage.setItem("access", access);
-
+     
          dispatch(
           setCredentials({
             user:null,

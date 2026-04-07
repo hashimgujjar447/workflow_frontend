@@ -12,6 +12,7 @@ import {
 import { useParams, useRouter } from 'next/navigation'
 import { useAppDispatch } from '@/hooks/hooks'
 import { useSocket } from '@/context/SocketContext'
+import toast from 'react-hot-toast'
 
 type TaskStatus = 'todo' | 'in_progress' | 'failed' | 'completed'
 
@@ -124,8 +125,9 @@ const ProjectTasks = () => {
       setDescription('')
       setAssignedUser('')
       setDueDate('')
-    } catch (err) {
-      console.log(err)
+      toast.success("New task added successfully")
+    } catch (err:any) {
+      toast.error(err?.data?.error || "Failed to create task")
     }
   }
 

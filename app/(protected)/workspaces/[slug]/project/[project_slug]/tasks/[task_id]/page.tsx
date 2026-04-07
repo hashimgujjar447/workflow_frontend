@@ -15,6 +15,7 @@ import CommentCard from '@/components/features/tasks/CommentCard'
 import { useSocket } from '@/context/SocketContext'
 import { useEffect } from 'react'
 import { useAppDispatch } from '@/hooks/hooks'
+import toast from 'react-hot-toast'
 
 const statusColors: any = {
   todo: 'bg-gray-100 text-gray-700',
@@ -134,12 +135,20 @@ const TaskDetailPage = () => {
           <select
             value={task.status}
             onChange={(e) =>
-              updateStatus({
+            {
+              try {
+                  updateStatus({
                 workspace_slug: slug,
                 project_slug,
                 task_id,
                 status: e.target.value,
               })
+              toast.success("Task updated successfully")
+              } catch (error) {
+                toast.error(error?.data?.error || "Failed to updated status")
+                
+              }
+            }
             }
             className={`text-xs px-3 py-1 rounded-full border ${statusColors[task.status]}`}
           >

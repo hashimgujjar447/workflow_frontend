@@ -5,6 +5,7 @@ import { WorkspaceProvider, useWorkspace } from '@/context/WorkspaceContext'
 import { Button } from '@/components/ui/Button'
 import { Plus } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
+import {toast} from 'react-hot-toast'
 
 import { useState,useEffect } from 'react'
 import {
@@ -44,14 +45,13 @@ const WorkspaceLayoutContent = ({
 
       await createWorkspace({ name }).unwrap()
 
+      toast.success("Workspace created successfully")
       setIsOpen(false)
       setName('')
+
       router.push('/workspaces')
     } catch (error: any) {
-      alert(
-        error?.data?.name ||
-          'Workspace name must be unique'
-      )
+       toast.error(  error?.data?.name || "Failed to create task ❌");
     }
   }
 

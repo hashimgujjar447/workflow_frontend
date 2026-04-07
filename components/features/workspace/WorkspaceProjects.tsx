@@ -11,6 +11,7 @@ import {
 import { IProject } from '@/types/project'
 import { useState } from 'react'
 import { usePermission } from '@/hooks/usePermissions'
+import toast from 'react-hot-toast'
 
 const WorkspaceProjects = () => {
   const router = useRouter()
@@ -28,7 +29,6 @@ const WorkspaceProjects = () => {
   const { isLoading: permissionLoading, canCreateProject } =
     usePermission(slug)
 
-  // ✅ modal state
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
 
@@ -43,8 +43,10 @@ const WorkspaceProjects = () => {
 
       setName('')
       setOpen(false)
-    } catch (err) {
-      console.error(err)
+      toast.success("Project created successfully.")
+    } catch (err:any) {
+    
+     toast.error(err?.data?.name || "Failed to create project")
     }
   }
 

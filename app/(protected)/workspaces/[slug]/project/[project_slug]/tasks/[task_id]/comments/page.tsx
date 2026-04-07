@@ -50,7 +50,6 @@ const Page = () => {
   const [addComment, { isLoading: isSubmitting }] =
     useAddCommentMutation()
 
-  /* ================= SOCKET ================= */
   useEffect(() => {
     if (!socket) return
 
@@ -58,7 +57,6 @@ const Page = () => {
       const parsed = JSON.parse(e.data)
 
       if (parsed.event === 'comment_created') {
-        // ❌ apni hi comment ignore
         if (parsed.author_id === user?.id) return
 
         const newComment = {
@@ -87,18 +85,16 @@ const Page = () => {
               workspace_slug: slug,
               project_slug,
               task_id,
-              page: 1, // must match query
+              page: 1,
             },
             (draft: any) => {
               if (!draft?.results) return
 
-              // ✅ duplicate check
               const exists = draft.results.some(
                 (c: any) => c.id === newComment.id
               )
               if (exists) return
 
-              // ✅ reply handling
               if (newComment.parent_comment) {
                 const parent = draft.results.find(
                   (c: any) => c.id === newComment.parent_comment
@@ -110,8 +106,46 @@ const Page = () => {
                 }
               }
 
-              // ✅ new comment
               draft.results.unshift(newComment)
+            }
+          )
+        )
+      }
+
+      if (
+        parsed.event === 'comment_reaction_created' ||
+        parsed.event === 'comment_reaction_updated'
+      ) {
+        dispatch(
+          workspaceApi.util.updateQueryData(
+            'getTaskComments',
+            {
+              workspace_slug: slug,
+              project_slug,
+              task_id,
+              page: 1,
+            },
+            (draft: any) => {
+              if (!draft?.results) return
+
+              const updateReaction = (comments: any[]) => {
+                for (let comment of comments) {
+                  if (comment.id === parsed.comment_id) {
+                    comment.likes = parsed.likes
+                    comment.dislikes = parsed.dislikes
+
+                    if (parsed.user_id === user?.id) {
+                      comment.user_reaction = parsed.reaction
+                    }
+                  }
+
+                  if (comment.replies?.length) {
+                    updateReaction(comment.replies)
+                  }
+                }
+              }
+
+              updateReaction(draft.results)
             }
           )
         )
@@ -125,7 +159,6 @@ const Page = () => {
     }
   }, [socket, user, slug, project_slug, task_id, dispatch])
 
-  /* ================= SUBMIT ================= */
   const handleSubmit = async (formData: { content: string }) => {
     await addComment({
       workspace_slug: slug,
@@ -141,7 +174,6 @@ const Page = () => {
 
   const comments = data?.results || []
 
-  /* 🔄 LOADING */
   if (taskLoading || commentsLoading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -150,7 +182,6 @@ const Page = () => {
     )
   }
 
-  /* ❌ ERROR */
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-3 text-center">
@@ -169,13 +200,10 @@ const Page = () => {
 
   return (
     <div>
-      {/* 🔝 HEADER */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-lg font-semibold">Comments</h1>
-          <p className="text-xs text-gray-500">
-            {task?.title}
-          </p>
+          <p className="text-xs text-gray-500">{task?.title}</p>
         </div>
 
         <button
@@ -186,12 +214,9 @@ const Page = () => {
         </button>
       </div>
 
-      {/* 📭 EMPTY STATE */}
       {comments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-[60vh] text-center gap-4">
-          <div className="p-3 rounded-full bg-gray-100">
-            💬
-          </div>
+        <div className="flex flex-col items-center justify-center h-[60vh] gap-4 text-center">
+          <div className="p-3 rounded-full bg-gray-100">💬</div>
 
           <h2 className="text-sm font-semibold">
             No comments yet
@@ -210,7 +235,6 @@ const Page = () => {
         </div>
       ) : (
         <>
-          {/* ➕ ADD BUTTON */}
           <div className="flex justify-end mb-4">
             <button
               onClick={() => {
@@ -223,7 +247,6 @@ const Page = () => {
             </button>
           </div>
 
-          {/* 💬 COMMENTS LIST */}
           <div className="space-y-4">
             {comments.map((comment: any) => (
               <CommentCard
@@ -239,7 +262,6 @@ const Page = () => {
         </>
       )}
 
-      {/* 🧾 MODAL */}
       <CommentModal
         isOpen={isOpen}
         onClose={() => {
