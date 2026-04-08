@@ -28,7 +28,7 @@ const TaskDetailPage = () => {
   const params = useParams()
   const router = useRouter()
 
-  const { user } = useSelector((state: RootState) => state.auth)
+
 
   /* ✅ SOCKET INIT */
   const socket = useSocket()
@@ -134,18 +134,18 @@ const TaskDetailPage = () => {
 
           <select
             value={task.status}
-            onChange={(e) =>
+            onChange={async(e) =>
             {
               try {
-                  updateStatus({
+                await updateStatus({
                 workspace_slug: slug,
                 project_slug,
                 task_id,
                 status: e.target.value,
-              })
+              }).unwrap()
               toast.success("Task updated successfully")
               } catch (error) {
-                toast.error(error?.data?.error || "Failed to updated status")
+               toast.error((error as any)?.data?.error || "Failed to update status")
                 
               }
             }

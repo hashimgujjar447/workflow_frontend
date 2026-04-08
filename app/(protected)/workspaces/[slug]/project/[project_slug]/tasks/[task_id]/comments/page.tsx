@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks/hooks'
 
 import CommentCard from '@/components/features/tasks/CommentCard'
 import CommentModal from '@/components/features/tasks/AddCommentModel'
+import constants from 'node:constants'
 
 const Page = () => {
   const params = useParams()
@@ -129,7 +130,7 @@ const Page = () => {
               if (!draft?.results) return
 
               const updateReaction = (comments: any[]) => {
-                for (let comment of comments) {
+                for (const comment of comments) {
                   if (comment.id === parsed.comment_id) {
                     comment.likes = parsed.likes
                     comment.dislikes = parsed.dislikes
@@ -166,7 +167,7 @@ const Page = () => {
       task_id,
       content: formData.content,
       parent_comment: parentId,
-    })
+    }).unwrap()
 
     setIsOpen(false)
     setParentId(null)
