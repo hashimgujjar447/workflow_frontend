@@ -1,11 +1,12 @@
 'use client'
 
-import { useGetWorkspaceMembersQuery } from "@/store/services/workspaceApi";
 import { useSelector } from "react-redux";
+import { useGetWorkspaceMembersQuery } from "@/store/services/workspaceApi";
 
 export const useWorkspaceRole = (workspace_slug) => {
-  const user = useSelector((state) => state.auth.user)
-
+  const {user}= useSelector((state) => state.auth)
+   
+  
   const { isLoading, data } = useGetWorkspaceMembersQuery(
     { workspace_slug },
     {

@@ -3,7 +3,9 @@ import React, { useState } from "react";
 import Sidebar from "../Sidebar";
 import { Menu } from "lucide-react";
 import { Provider } from "react-redux";
-import {store} from '@/store/store'
+import {store,persistor} from '@/store/store'
+import { PersistGate } from "redux-persist/integration/react";
+
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,6 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
   <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor} >
       <div className="flex h-screen">
 
       {/* Desktop Sidebar */}
@@ -51,6 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </div>
     </div>
+    </PersistGate>
   </Provider>
   );
 };

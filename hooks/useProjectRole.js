@@ -2,7 +2,7 @@ import { useGetProjectMembersQuery } from "@/store/services/workspaceApi";
 import { useSelector } from "react-redux";
 
 export const useProjectRole = (workspace_slug, project_slug) => {
-  const user = useSelector((state) => state.auth.user);
+   const {user}= useSelector((state) => state.auth)
 
   const { data, isLoading } = useGetProjectMembersQuery(
     { workspace_slug, project_slug },

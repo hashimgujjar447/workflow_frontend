@@ -28,12 +28,12 @@ const TopBar = ({ workspaces }: any) => {
     <div className='flex items-center justify-between'>
       <div>
         {workspaces && workspaces.length > 0 ? (
-          <Select
-            value={slug}
-            onValueChange={(value) => {
-              router.push(`/workspaces/${value}`)
-            }}
-          >
+         <Select
+  value={slug || ""}
+  onValueChange={(value) => {
+    router.push(`/workspaces/${value}`)
+  }}
+>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select Workspace" />
             </SelectTrigger>
