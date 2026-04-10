@@ -8,10 +8,12 @@ import {
   useDeleteWorkspaceMutation,
 } from '@/store/services/workspaceApi'
 import { usePermission } from '@/hooks/usePermissions'
+import toast from 'react-hot-toast'
 
 const WorkspaceSettings = () => {
   const params = useParams()
   const router = useRouter()
+
   const slug = Array.isArray(params.slug)
     ? params.slug[0]
     : params.slug
@@ -40,9 +42,10 @@ const WorkspaceSettings = () => {
     canUpdateWorkspace,
   } = usePermission(slug)
 
+ 
   useEffect(() => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
     if (data?.name) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(data.name)
     }
   }, [data])
@@ -79,8 +82,14 @@ const WorkspaceSettings = () => {
     setErrorMsg('')
 
     try {
-      await updateWorkspace({ slug, name }).unwrap()
+      const res = await updateWorkspace({ slug, name }).unwrap()
+
+      toast.success('Workspace updated successfully')
+
+      // redirect to updated workspace
+      router.push(`/workspaces/${res?.slug || slug}`)
     } catch (err) {
+      toast.error('Failed to update workspace')
       setErrorMsg('Failed to update workspace')
     }
   }
@@ -94,15 +103,18 @@ const WorkspaceSettings = () => {
 
     try {
       await deleteWorkspace(slug).unwrap()
+
+      toast.success('Workspace deleted successfully')
+
       router.push('/workspaces')
     } catch (err) {
+      toast.error('Failed to delete workspace')
       setErrorMsg('Failed to delete workspace')
     }
   }
 
   return (
     <div className="mt-7 max-w-xl space-y-6">
-
       {/* 🔝 HEADER */}
       <h1 className="text-lg font-semibold">
         Workspace Settings

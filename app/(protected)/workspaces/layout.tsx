@@ -3,7 +3,7 @@
 import TopBar from '@/components/layouts/TopBar'
 import { WorkspaceProvider, useWorkspace } from '@/context/WorkspaceContext'
 import { Button } from '@/components/ui/Button'
-import { Plus } from 'lucide-react'
+import { ArrowLeft, Plus } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import {toast} from 'react-hot-toast'
 
@@ -71,38 +71,72 @@ const WorkspaceLayoutContent = ({
 
       <div className="mt-6">
         {/* 🔥 HEADER */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          
-          {/* ✅ BREADCRUMB */}
-          <h1 className="text-lg font-semibold flex items-center gap-2 flex-wrap">
-            {slug ? (
-              <>
-                <span className="capitalize">{slug}</span>
+    <div className="flex items-center justify-between flex-wrap gap-3 border-b pb-3">
 
-                {selectedProject?.name && (
-                  <>
-                    <span className="text-gray-400">/</span>
-                    <span className="text-primary_blue font-medium">
-                      {selectedProject.name}
-                    </span>
-                  </>
-                )}
-              </>
-            ) : (
-              <span>Workspace Page</span>
-            )}
-          </h1>
+  {/* LEFT SIDE */}
+  <div className="flex items-center  gap-3 flex-wrap">
 
-          {/* ✅ ACTION BUTTON */}
-          {!slug && (
-            <Button
-              onClick={() => setIsOpen(true)}
-              className="flex items-center gap-1 bg-primary_blue text-white px-3 py-2 text-sm hover:opacity-90"
-            >
-              <Plus size={16} /> New Workspace
-            </Button>
-          )}
-        </div>
+    {/* Back Button */}
+    <button
+      onClick={() => router.back()}
+      className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border bg-white hover:bg-gray-100 transition"
+    >
+      <ArrowLeft size={14} />
+      Back
+    </button>
+
+    {/* Divider */}
+    <div className="h-4 w-px bg-gray-300 hidden sm:block" />
+
+    {/* Breadcrumb */}
+    <div className="flex items-center gap-1 text-sm sm:text-base font-medium flex-wrap">
+
+      <span
+        onClick={() => router.push('/workspaces')}
+        className="text-gray-500 hover:text-black cursor-pointer"
+      >
+        Workspaces
+      </span>
+
+      {slug && (
+        <>
+          <span className="text-gray-400">/</span>
+
+          <span
+            onClick={() => router.push(`/workspaces/${slug}`)}
+            className="capitalize text-gray-700 hover:text-black cursor-pointer"
+          >
+            {slug}
+          </span>
+        </>
+      )}
+
+      {selectedProject?.name && (
+        <>
+          <span className="text-gray-400">/</span>
+
+          <span className="text-primary_blue font-semibold">
+            {selectedProject.name}
+          </span>
+        </>
+      )}
+
+    </div>
+
+  </div>
+
+  {/* RIGHT SIDE */}
+  {!slug && (
+    <button
+      onClick={() => setIsOpen(true)}
+      className="flex items-center gap-1 bg-primary_blue text-white px-3 py-2 text-xs sm:text-sm rounded-md hover:opacity-90 transition"
+    >
+      <Plus size={16} />
+      New Workspace
+    </button>
+  )}
+
+</div>
 
         {/* 🔻 CONTENT */}
         <div className="mt-4">{children}</div>

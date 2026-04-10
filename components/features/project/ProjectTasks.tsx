@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Calendar, Plus } from 'lucide-react'
+import { Calendar, Plus, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import {
   useGetProjectMembersQuery,
@@ -67,7 +67,6 @@ const ProjectTasks = () => {
     completed: [],
   }
 
-  /* SOCKET */
   useEffect(() => {
     if (!socket) return
 
@@ -110,6 +109,33 @@ const ProjectTasks = () => {
 
   const handleAddNewTask = async () => {
     try {
+      const today = new Date().toISOString().split('T')[0]
+
+      if (!title.trim()) {
+        toast.error('Title is required')
+        return
+      }
+
+      if (!description.trim()) {
+        toast.error('Description is required')
+        return
+      }
+
+      if (!assignedUser) {
+        toast.error('Please assign a user')
+        return
+      }
+
+      if (!dueDate) {
+        toast.error('Due date is required')
+        return
+      }
+
+      if (dueDate < today) {
+        toast.error('Due date cannot be in the past')
+        return
+      }
+
       await addNewTask({
         workspace_slug,
         project_slug,
@@ -125,13 +151,13 @@ const ProjectTasks = () => {
       setDescription('')
       setAssignedUser('')
       setDueDate('')
-      toast.success("New task added successfully")
-    } catch (err:any) {
-      toast.error(err?.data?.error || "Failed to create task")
+
+      toast.success('New task added successfully')
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to create task')
     }
   }
 
-  /* LOADING */
   if (isTasksLoading) {
     return (
       <div className="flex items-center justify-center h-[40vh]">
@@ -140,7 +166,6 @@ const ProjectTasks = () => {
     )
   }
 
-  /* ERROR */
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[40vh] gap-3 text-center">
@@ -182,49 +207,44 @@ const ProjectTasks = () => {
 
   return (
     <div className="mt-5">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-row items-center justify-between gap-2 mb-4">
         <h1 className="text-sm font-semibold">Project Tasks</h1>
 
         <Button
           onClick={() => setOpenAddTaskMenu(true)}
-          className="bg-primary_blue text-white text-xs px-3 py-1 flex items-center gap-1"
+          className="bg-primary_blue text-white text-xs md:text-sm px-2 sm:px-3 py-1 flex items-center gap-1"
         >
           <Plus size={14} />
           Add Task
         </Button>
       </div>
 
-      {/* EMPTY STATE */}
       {isEmpty ? (
-  <div className="flex items-center justify-center h-[50vh]">
-    <div className="flex flex-col items-center text-center gap-3 bg-cards border border-custom_border rounded-xl p-8 shadow-sm">
-      
-      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
-        <Plus className="w-5 h-5 text-gray-400" />
-      </div>
+        <div className="flex items-center justify-center h-[50vh]">
+          <div className="flex flex-col items-center text-center gap-3 bg-cards border border-custom_border rounded-xl p-6 md:p-8 shadow-sm">
+            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
+              <Plus className="w-5 h-5 text-gray-400" />
+            </div>
 
-      <h2 className="text-sm font-semibold">
-        No tasks available
-      </h2>
+            <h2 className="text-sm font-semibold">No tasks available</h2>
 
-      <p className="text-xs text-gray-500 max-w-xs">
-        You haven’t created any tasks yet.  
-        Click the <span className="font-medium text-black">“Add Task”</span> button above to get started.
-      </p>
-
-    </div>
-  </div>
-)  : (
-        <div className="flex gap-5 overflow-x-auto pb-2">
+            <p className="text-xs text-gray-500 max-w-xs">
+              You haven’t created any tasks yet.
+              Click the <span className="font-medium text-black">“Add Task”</span> button above.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col md:flex-row gap-4 md:gap-5 md:overflow-x-auto pb-2">
           {columns.map((col) => (
-            <div key={col.id} className="min-w-[280px] bg-gray-50 border rounded-xl p-3">
+            <div key={col.id} className="w-full md:min-w-[280px] bg-gray-50 border rounded-xl p-3">
               <div className={`flex justify-between text-white px-2 py-2 rounded ${col.color}`}>
                 <h2 className="text-sm font-semibold">
                   {col.title} ({col.tasks.length})
                 </h2>
               </div>
 
-              <div className="mt-3 space-y-3 max-h-60 overflow-y-auto">
+              <div className="mt-3 space-y-3 md:max-h-60 md:overflow-y-auto">
                 {col.tasks.map((task) => (
                   <div
                     key={task.id}
@@ -233,9 +253,17 @@ const ProjectTasks = () => {
                         `/workspaces/${workspace_slug}/project/${project_slug}/tasks/${task.id}`
                       )
                     }
-                    className="bg-white p-3 rounded-lg border cursor-pointer"
+                    className="bg-white p-3 rounded-lg border cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary_blue group"
                   >
-                    <h3 className="text-sm font-medium">{task.title}</h3>
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-sm font-medium group-hover:text-primary_blue">
+                        {task.title}
+                      </h3>
+                      <ArrowRight
+                        size={14}
+                        className="opacity-0 group-hover:opacity-100 transition"
+                      />
+                    </div>
 
                     <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
                       <Calendar size={12} />
@@ -245,6 +273,8 @@ const ProjectTasks = () => {
                           : 'No date'}
                       </span>
                     </div>
+
+                    
                   </div>
                 ))}
               </div>
@@ -253,10 +283,9 @@ const ProjectTasks = () => {
         </div>
       )}
 
-      {/* MODAL */}
       {openAddTaskMenu && (
-        <div className="fixed inset-0 bg-black/40  flex items-center justify-center z-[9999]">
-          <div className="bg-white p-6 rounded-xl w-[400px]">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
+          <div className="bg-white p-4 md:p-6 rounded-xl w-[90%] max-w-md">
             <h2 className="text-sm font-semibold mb-3">Create Task</h2>
 
             <input
@@ -277,6 +306,7 @@ const ProjectTasks = () => {
               type="date"
               className="border w-full p-2 rounded mb-2"
               value={dueDate}
+              min={new Date().toISOString().split('T')[0]}
               onChange={(e) => setDueDate(e.target.value)}
             />
 

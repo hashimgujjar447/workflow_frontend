@@ -130,7 +130,7 @@ const TaskDetailPage = () => {
 
         {/* TITLE + STATUS */}
         <div className="flex justify-between items-start gap-4">
-          <h1 className="text-xl font-semibold">{task.title}</h1>
+          <h1 className="text-lg sm:text-xl font-semibold">{task.title}</h1>
 
           <select
             value={task.status}
@@ -233,7 +233,7 @@ const TaskDetailPage = () => {
           </div>
         ) : (
           <div className="text-center py-6 text-gray-500 text-sm">
-            No comments yet
+           No comments yet click on view all to add new commment
           </div>
         )}
       </div>

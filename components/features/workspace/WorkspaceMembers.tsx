@@ -123,9 +123,9 @@ const WorkspaceMembers = () => {
             return (
               <div
                 key={index}
-                className="flex items-center justify-between bg-white border rounded-xl p-4 hover:shadow-sm transition"
+                className="flex items-center justify-between bg-white border rounded-xl sm:p-4 p-1 py-3 hover:shadow-sm transition"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 sm:gap-3">
 
                   {/* 👤 Avatar */}
                   <div className="w-9 h-9 flex items-center justify-center rounded-full bg-primary_blue text-white text-xs font-semibold">
@@ -137,7 +137,7 @@ const WorkspaceMembers = () => {
                     <p className="text-sm font-medium">
                       {user?.first_name} {user?.last_name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="sm:text-xs text-[10px] truncate text-gray-500">
                       {user?.email}
                     </p>
                   </div>
@@ -147,7 +147,7 @@ const WorkspaceMembers = () => {
                   <p className="text-xs capitalize font-medium">
                     {member.role}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="sm:text-xs text-[9px] text-gray-400">
                     Joined:{' '}
                     {new Date(
                       member.joined_at

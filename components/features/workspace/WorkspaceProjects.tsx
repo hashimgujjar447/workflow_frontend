@@ -68,9 +68,9 @@ const WorkspaceProjects = () => {
         {canCreateProject && data?.length > 0 && (
           <Button
             onClick={() => setOpen(true)}
-            className="bg-cards text-black rounded border-custom_border border hover:text-white"
+            className="bg-cards text-black rounded border-custom_border border text-xs sm:text-sm hover:text-white"
           >
-            <Plus size={16} /> Create New Project
+            <Plus size={16} className='hidden sm:block' /> Create New Project
           </Button>
         )}
       </div>

@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
@@ -8,13 +9,20 @@ import {
 
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { usePermission } from '@/hooks/usePermissions'
+import toast from 'react-hot-toast'
 
 const ProjectSettings = () => {
   const params = useParams()
   const router = useRouter()
 
-  const workspaceSlug = params?.slug
-  const projectSlug = params?.project_slug
+  // ✅ FIX params (important)
+  const workspaceSlug = Array.isArray(params?.slug)
+    ? params.slug[0]
+    : params?.slug
+
+  const projectSlug = Array.isArray(params?.project_slug)
+    ? params.project_slug[0]
+    : params?.project_slug
 
   const { selectedProject } = useWorkspace()
 
@@ -34,8 +42,8 @@ const ProjectSettings = () => {
   } = usePermission(workspaceSlug, projectSlug)
 
   useEffect(() => {
-    if (selectedProject) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (selectedProject) {
       setName(selectedProject?.name)
     }
   }, [selectedProject])
@@ -52,13 +60,25 @@ const ProjectSettings = () => {
   /* ✏️ UPDATE */
   const handleUpdate = async () => {
     setErrorMsg('')
+
     try {
-      await updateProject({
+      const res = await updateProject({
         workspace_slug: workspaceSlug,
         project_slug: projectSlug,
         data: { name },
       }).unwrap()
-    } catch (err: any) {
+
+    
+      toast.success('Project updated successfully')
+
+      // ✅ redirect with NEW slug if changed
+      router.push(
+        `/workspaces/${workspaceSlug}/project/${
+          res?.slug
+        }`
+      )
+    } catch (err) {
+      toast.error('Failed to update project')
       setErrorMsg('Failed to update project')
     }
   }
@@ -76,8 +96,11 @@ const ProjectSettings = () => {
         project_slug: projectSlug,
       }).unwrap()
 
+      toast.success('Project deleted successfully')
+
       router.push(`/workspaces/${workspaceSlug}`)
     } catch (err) {
+      toast.error('Failed to delete project')
       setErrorMsg('Failed to delete project')
     }
   }

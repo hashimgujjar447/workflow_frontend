@@ -31,10 +31,10 @@ const Page = () => {
 
       {/* HEADER */}
       <div>
-        <h1 className="text-xl font-semibold text-gray-800">
+        <h1 className=" text-lg sm:text-xl font-semibold text-gray-800">
           Settings
         </h1>
-        <p className="text-sm text-gray-500">
+        <p className="text-xs sm:text-sm text-gray-500">
           Manage your profile and workspace activity
         </p>
       </div>

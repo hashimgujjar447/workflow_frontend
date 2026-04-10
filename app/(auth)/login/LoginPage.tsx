@@ -6,13 +6,14 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "@/store/slices/authSlice/authSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const searchParams=useSearchParams()
-    const redirect = searchParams.get('redirect')
-const redirectParam = redirect ? encodeURIComponent(redirect) : ''
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
+  const redirectParam = redirect ? encodeURIComponent(redirect) : "";
 
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
@@ -24,8 +25,6 @@ const redirectParam = redirect ? encodeURIComponent(redirect) : ''
     try {
       const res = await login({ email, password }).unwrap();
 
-     console.log("Login responce ",res)
-    
       dispatch(
         setCredentials({
           user: { email },
@@ -33,11 +32,17 @@ const redirectParam = redirect ? encodeURIComponent(redirect) : ''
         })
       );
 
-      // ✅ 3. redirect
-      router.push(redirect || "/dashboard");
+      toast.success("Login successful");
 
-    } catch (err) {
-      console.error("Login failed", err);
+      router.push(redirect || "/dashboard");
+    } catch (err: any) {
+      const message =
+        err?.data?.detail ||
+        err?.data?.message ||
+        err?.data?.non_field_errors?.[0] ||
+        "Login failed";
+
+      toast.error(message);
     }
   };
 
@@ -68,16 +73,16 @@ const redirectParam = redirect ? encodeURIComponent(redirect) : ''
         <button className="w-full bg-black text-white py-2 rounded">
           {isLoading ? "Logging in..." : "Login"}
         </button>
-         <p className="text-sm mt-3 text-center">
-                   Not have an account?{" "}
-                 <Link
-  href={redirect ? `/register?redirect=${redirectParam}` : '/register'}
-  className="text-blue-500"
->
-  Register
-</Link>
-                  
-                </p>
+
+        <p className="text-sm mt-3 text-center">
+          Not have an account?{" "}
+          <Link
+            href={redirect ? `/register?redirect=${redirectParam}` : "/register"}
+            className="text-blue-500"
+          >
+            Register
+          </Link>
+        </p>
       </form>
     </div>
   );

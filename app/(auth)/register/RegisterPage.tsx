@@ -1,13 +1,14 @@
-'use client'
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useRegisterMutation } from "@/store/services/authApi";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
-  const router = useRouter()
-  const [register, { isLoading }] = useRegisterMutation()
+  const router = useRouter();
+  const [register, { isLoading }] = useRegisterMutation();
 
   const [form, setForm] = useState({
     first_name: "",
@@ -17,10 +18,8 @@ export default function RegisterPage() {
     password: "",
   });
 
-  const [error, setError] = useState("")
-
-  const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect')
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
@@ -31,28 +30,25 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("")
 
     try {
-      await register(form).unwrap()
+      await register(form).unwrap();
 
-      // ✅ success → login page
+      toast.success("Account created successfully");
+
       router.push(
         redirect
           ? `/login?redirect=${encodeURIComponent(redirect)}`
-          : '/login'
-      )
-
+          : "/login"
+      );
     } catch (err: any) {
-      console.log(err)
-
-      // 🔥 Better error handling
-      setError(
+      const message =
         err?.data?.message ||
         err?.data?.email?.[0] ||
         err?.data?.username?.[0] ||
-        "Registration failed"
-      )
+        "Registration failed";
+
+      toast.error(message);
     }
   };
 
@@ -64,16 +60,38 @@ export default function RegisterPage() {
       >
         <h2 className="text-2xl font-bold text-center">Register</h2>
 
-        {/* ❌ ERROR */}
-        {error && (
-          <p className="text-red-500 text-sm text-center">{error}</p>
-        )}
-
-        <input name="first_name" placeholder="First Name" className="w-full p-2 border rounded" onChange={handleChange} />
-        <input name="last_name" placeholder="Last Name" className="w-full p-2 border rounded" onChange={handleChange} />
-        <input name="username" placeholder="Username" className="w-full p-2 border rounded" onChange={handleChange} />
-        <input type="email" name="email" placeholder="Email" className="w-full p-2 border rounded" onChange={handleChange} />
-        <input type="password" name="password" placeholder="Password" className="w-full p-2 border rounded" onChange={handleChange} />
+        <input
+          name="first_name"
+          placeholder="First Name"
+          className="w-full p-2 border rounded"
+          onChange={handleChange}
+        />
+        <input
+          name="last_name"
+          placeholder="Last Name"
+          className="w-full p-2 border rounded"
+          onChange={handleChange}
+        />
+        <input
+          name="username"
+          placeholder="Username"
+          className="w-full p-2 border rounded"
+          onChange={handleChange}
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          className="w-full p-2 border rounded"
+          onChange={handleChange}
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          className="w-full p-2 border rounded"
+          onChange={handleChange}
+        />
 
         <button
           type="submit"
@@ -86,7 +104,11 @@ export default function RegisterPage() {
         <p className="text-sm text-center">
           Already have an account?{" "}
           <Link
-            href={redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'}
+            href={
+              redirect
+                ? `/login?redirect=${encodeURIComponent(redirect)}`
+                : "/login"
+            }
             className="text-blue-500"
           >
             Login

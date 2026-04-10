@@ -207,12 +207,7 @@ const Page = () => {
           <p className="text-xs text-gray-500">{task?.title}</p>
         </div>
 
-        <button
-          onClick={() => router.back()}
-          className="text-xs text-gray-500 hover:underline"
-        >
-          Back
-        </button>
+       
       </div>
 
       {comments.length === 0 ? (
@@ -236,13 +231,13 @@ const Page = () => {
         </div>
       ) : (
         <>
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-start sm:justify-end mb-4">
             <button
               onClick={() => {
                 setParentId(null)
                 setIsOpen(true)
               }}
-              className="bg-primary_blue text-white px-4 py-2 rounded-lg text-xs"
+              className="bg-primary_blue text-white px-2  sm:px-4 py-2 rounded-lg text-xs"
             >
               + Add Comment
             </button>

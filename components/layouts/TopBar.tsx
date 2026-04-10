@@ -57,11 +57,13 @@ const TopBar = ({ workspaces }: any) => {
       <div className='flex items-center  sm:gap-x-4'>
         <input
           type="text"
-          className='outline-none border w-40 border-border p-1 rounded'
+          className='outline-none hidden sm:block border w-40 border-border p-1 rounded'
           placeholder='Search'
         />
         <BellRing className='hidden sm:inline-block' />
-        <div className='bg-black hidden rounded-full text-sidebar-text h-8 sm:flex items-center justify-center w-8'>
+        <div onClick={()=>{
+          router.push('/settings')
+        }} className='bg-black hover:cursor-pointer hidden rounded-full text-sidebar-text h-8 sm:flex items-center justify-center w-8'>
           M
         </div>
       </div>

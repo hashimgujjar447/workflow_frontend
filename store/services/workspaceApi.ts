@@ -81,6 +81,7 @@ export const workspaceApi = api.injectEndpoints({
         method: 'PATCH',
         body,
       }),
+      invalidatesTags:['Workspaces']
     }),
 
     deleteWorkspace: builder.mutation({
@@ -88,6 +89,7 @@ export const workspaceApi = api.injectEndpoints({
         url: `workspaces/${slug}/`,
         method: 'DELETE',
       }),
+      invalidatesTags:['Workspaces']
     }),
 
     getAllTasks: builder.query({
@@ -169,6 +171,7 @@ handleInvite: builder.mutation({
     method: 'POST',
     body: { token, action },
   }),
+  invalidatesTags:['Workspaces']
 }),
 getTask: builder.query({
   query: ({ workspace_slug, project_slug, task_id }) =>({

@@ -135,9 +135,9 @@ const ProjectMembers = ({ project }: ProjectMembersProps) => {
             return (
               <div
                 key={index}
-                className="p-4 border rounded-xl flex justify-between items-center bg-white hover:shadow-sm transition"
+                className=" sm:p-4 p-1 py-3 border rounded-xl flex justify-between items-center bg-white hover:shadow-sm transition"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
 
                   {/* 🔥 Avatar */}
                   <div className="w-8 h-8 flex items-center justify-center rounded-full bg-primary_blue text-white text-xs font-semibold">
@@ -148,7 +148,7 @@ const ProjectMembers = ({ project }: ProjectMembersProps) => {
                     <p className="font-medium text-sm">
                       {user?.first_name} {user?.last_name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className=" text-[10px] sm:text-xs text-gray-500">
                       {user?.email}
                     </p>
                   </div>
@@ -158,7 +158,7 @@ const ProjectMembers = ({ project }: ProjectMembersProps) => {
                   <p className="text-sm font-medium capitalize">
                     {member?.role}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-[10px] sm:text-xs text-gray-400">
                     Joined: {new Date(member?.joined_at).toLocaleDateString()}
                   </p>
                 </div>
