@@ -4,45 +4,49 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials, logout } from "@/store/slices/authSlice/authSlice";
 import { useLazyGetProfileQuery } from "@/store/services/authApi";
+import { RootState } from "@/store/store";
 
 export default function AuthInitializer() {
   const dispatch = useDispatch();
   const [getProfile] = useLazyGetProfileQuery();
 
+  const isInitialized = useSelector(
+    (state: RootState) => state.auth.isInitialized
+  );
+
   useEffect(() => {
-  const initAuth = async () => {
-    try {
-      const refreshRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}token/refresh/`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+    if (isInitialized) return; // ✅ prevent duplicate runs
 
-      if (!refreshRes.ok) throw new Error("No refresh");
+    const initAuth = async () => {
+      try {
+        const refreshRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}token/refresh/`,
+          {
+            method: "POST",
+            credentials: "include",
+          }
+        );
 
-      const data = await refreshRes.json();
-      const access = data.access;
+        if (!refreshRes.ok) throw new Error("No refresh");
 
-      // ✅ Direct profile fetch
-      const freshUser = await getProfile(undefined).unwrap();
+        const data = await refreshRes.json();
+        const access = data.access;
 
-      dispatch(
-        setCredentials({
-          user: freshUser,
-          token: access,
-        })
-      );
+        const freshUser = await getProfile(undefined).unwrap();
 
-    } catch (err) {
-      console.log(err);
-      dispatch(logout());
-    }
-  };
+        dispatch(
+          setCredentials({
+            user: freshUser,
+            token: access,
+          })
+        );
+      } catch (err) {
+        dispatch(logout());
+      }
+    };
 
-  initAuth();
-}, [dispatch, getProfile]);
+    initAuth();
+  }, [dispatch, getProfile, isInitialized]);
 
   return null;
 }

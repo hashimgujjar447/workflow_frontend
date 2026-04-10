@@ -15,7 +15,7 @@ const isFetchBaseQueryError = (
   typeof (error as FetchBaseQueryError).status === "number";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl:process.env.NEXT_PUBLIC_API_URL,
+  baseUrl: process.env.NEXT_PUBLIC_API_URL,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as any).auth.token;
@@ -35,11 +35,11 @@ export const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
- 
- if (
-  isFetchBaseQueryError(result.error) &&
-  (result.error.status === 401 || result.error.status === 403)
-) {
+  if (
+    isFetchBaseQueryError(result.error) &&
+    (result.error.status === 401 || result.error.status === 403)
+  ) {
+    // 🔥 REFRESH TOKEN
     const refreshResult = await baseQuery(
       {
         url: "token/refresh/",
@@ -52,31 +52,36 @@ export const baseQueryWithReauth: BaseQueryFn<
     if (refreshResult.data) {
       const access = (refreshResult.data as { access: string }).access;
 
+      const state = api.getState() as any;
+      let currentUser = state.auth.user;
+
+     
+      if (!currentUser?.id) {
+        try {
+          const userResult = await baseQuery(
+            {
+              url: "profile/",
+              method: "GET",
+            },
+            api,
+            extraOptions
+          );
+
+          currentUser = userResult.data;
+        } catch (err) {
+          currentUser = null;
+        }
+      }
+
       api.dispatch(
         setCredentials({
-          user: null,
+          user: currentUser,
           token: access,
         })
       );
 
-      result = await baseQuery(
-        typeof args === "string"
-          ? {
-              url: args,
-              headers: {
-                Authorization: `Bearer ${access}`,
-              },
-            }
-          : {
-              ...args,
-              headers: {
-                ...(args.headers || {}),
-                Authorization: `Bearer ${access}`,
-              },
-            },
-        api,
-        extraOptions
-      );
+    
+      result = await baseQuery(args, api, extraOptions);
     } else {
       api.dispatch(logout());
     }
