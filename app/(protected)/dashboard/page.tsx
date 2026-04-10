@@ -43,7 +43,7 @@ const Home = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
-          {workspacesData?.map((workspace: IWorkspace, index: number) => (
+          {workspacesData?.slice(0,3).map((workspace: IWorkspace, index: number) => (
             <DashboardWorkspaceCard key={index} workspace={workspace} />
           ))}
         </div>

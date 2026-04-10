@@ -101,6 +101,7 @@ export const workspaceApi = api.injectEndpoints({
         url: 'tasks/',
         method: 'GET',
       }),
+      providesTags:['all_user_tasks']
     }),
 
 
@@ -128,7 +129,7 @@ export const workspaceApi = api.injectEndpoints({
           }
 
       }),
-        invalidatesTags: ['Tasks']
+        invalidatesTags: ['Tasks','all_user_tasks']
 
 }),
     getProjectMembers: builder.query({
@@ -183,7 +184,7 @@ updateTaskStatus: builder.mutation({
     body: { status },
   }),
 
-  invalidatesTags: ['Tasks'],
+  invalidatesTags: ['Tasks','all_user_tasks'],
 }),
 getTaskComments: builder.query({
   query: ({ workspace_slug, project_slug, task_id, page = 1 }) =>
@@ -211,6 +212,9 @@ addCommentReaction: builder.mutation({
   
   ,
   invalidatesTags: ['TaskComments'],
+}),
+getUserStats: builder.query({
+  query: () => "user/stats/",
 }),
 
   }),
@@ -243,5 +247,6 @@ export const {
   useUpdateTaskStatusMutation,
   useAddCommentReactionMutation,
   useCreateWorkspaceProjectMutation,
-  useGetAllUserTasksQuery
+  useGetAllUserTasksQuery,
+  useGetUserStatsQuery
 } = workspaceApi
