@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Profiler, useState } from "react";
 import { useLoginMutation } from "@/store/services/authApi";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/store/slices/authSlice/authSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useLazyGetProfileQuery} from "@/store/services/authApi";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
   const redirectParam = redirect ? encodeURIComponent(redirect) : "";
+    const [getProfile] = useLazyGetProfileQuery();
 
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
@@ -25,12 +27,11 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password }).unwrap();
 
-      dispatch(
-        setCredentials({
-          user: { email },
-          token: res.access,
-        })
-      );
+dispatch(setCredentials({ user: null, token: res.access }));
+
+const freshUser = await getProfile(undefined).unwrap();
+
+dispatch(setCredentials({ user: freshUser, token: res.access }));
 
       toast.success("Login successful");
 
